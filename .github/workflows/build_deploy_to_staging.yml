@@ -1,0 +1,87 @@
+name: Build, Test, and Deploy for "Staging"
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    env:
+      TEST_USERNAME: postgres
+      TEST_PASSWORD: password
+      TEST_DB_NAME: test_db
+      TEST_DB_HOST: localhost
+      TEST_DB_PORT: 5432
+      TEST_MIGRATE: true
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: ${{ env.TEST_USERNAME }}
+          POSTGRES_PASSWORD: ${{ env.TEST_PASSWORD }}
+          POSTGRES_DB: ${{ env.TEST_DB_NAME }}
+        ports:
+          - 5432:5432
+        options: >-
+           --health-cmd="pg_isready -U $TEST_USERNAME -d $TEST_DB_NAME"
+           --health-interval=10s
+           --health-timeout=5s
+           --health-retries=5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Set Golang
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.22.1"
+      - name: Create app config file
+        run: cp app-sample.env app.env
+      - name: Build the application
+        run: go build -o telex_be
+      - name: Run the application
+        run: nohup ./telex_be > /dev/null 2>&1 &
+      - name: Wait for application to start
+        run: |
+          for i in {1..30}; do
+            if curl http://localhost:8019; then
+              break
+            fi
+            sleep 1
+          done
+      - name: Test for reachability
+        run: curl http://localhost:8019
+      - name: Run All Tests
+        run: go test ./... -timeout 300s
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build_and_test
+    if: github.event_name == 'push'
+    env:
+      APP_NAME: "telex_be"
+      APP_URL: "https://staging.api-golang.boilerplate.hng.tech"
+      MIGRATE: true
+
+    steps:
+      - name: SSH into server and deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            bash ./scripts/deploy_app.sh SERVER_PORT=${{ secrets.SERVER_PORT }} \
+              DB_NAME=${{ secrets.DB_NAME }} \
+              USERNAME=${{ secrets.USERNAME }} \
+              APP_NAME=${{ env.APP_NAME }} \
+              APP_URL=${{ env.APP_URL }} \
+              MIGRATE=${{ env.MIGRATE }}
+              
