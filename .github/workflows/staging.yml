@@ -1,12 +1,12 @@
-name: Build, Test, and Deploy for Production
+name: Build, Test, and Deploy for Staging
 
 on:
   push:
     branches:
-      - main
+      - staging
   pull_request:
     branches:
-      - main
+      - staging
 
 jobs:
   build_and_test:
@@ -49,9 +49,9 @@ jobs:
       - name: Create app config file
         run: cp app-sample.env app.env
       - name: Build the application
-        run: go build -o production_app
+        run: go build -o staging_app
       - name: Run the application
-        run: nohup ./production_app > /dev/null 2>&1 &
+        run: nohup ./staging_app > /dev/null 2>&1 &
       - name: Wait for application to start
         run: sleep 30s
       - name: Test for reachability
@@ -68,12 +68,12 @@ jobs:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_PORT: ${{ secrets.SSH_PORT }}
       SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-      SERVER_PORT: 9000
-      DB_NAME: "production_db"
-      USERNAME: "production_user"
-      APP_NAME: "production"
-      APP_URL: "https://api-golang.boilerplate.hng.tech"
-      REDIS_PORT: 6132
+      SERVER_PORT: 8000
+      DB_NAME: "staging_db"
+      USERNAME: "staging_user"
+      APP_NAME: "staging"
+      APP_URL: "https://staging.api-golang.boilerplate.hng.tech"
+      REDIS_PORT: 6131
       REDIS_HOST: "0.0.0.0"
       REDIS_DB: 0
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
@@ -85,6 +85,7 @@ jobs:
       MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
       MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
       MAIL_PORT: ${{ secrets.MAIL_PORT }}
+
     steps:
       - name: SSH into server and deploy
         uses: appleboy/ssh-action@v1.0.3
@@ -94,7 +95,7 @@ jobs:
           password: ${{ env.SSH_PASSWORD }}
           port: ${{ env.SSH_PORT }}
           script: |
-            export APPROOT=~/deployments/production
+            export APPROOT=~/deployments/staging
             mkdir -p $APPROOT
             cd $APPROOT
 
@@ -102,12 +103,12 @@ jobs:
               # Navigate to the repository directory and pull changes
               cd $APPROOT || { echo "Failed to navigate to web root directory"; exit 1; }
               git reset --hard HEAD || { echo "Failed to reset local changes"; exit 1; }
-              git pull origin main || { echo "Failed to pull latest changes"; exit 1; }
+              git pull origin staging || { echo "Failed to pull latest changes"; exit 1; }
             else
-              git clone -b main https://github.com/${{ github.repository}} . || { echo "Failed to clone repository"; exit 1; }
+              git clone -b staging https://github.com/${{ github.repository}} . || { echo "Failed to clone repository"; exit 1; }
             fi
 
-            bash ./scripts/deploy_app.sh production https://github.com/${{ github.repository}} 
+            bash ./scripts/deploy_app.sh staging https://github.com/${{ github.repository}}
               SERVER_PORT=${{ env.SERVER_PORT }} \
               DB_NAME=${{ env.DB_NAME }} \
               USERNAME=${{ env.USERNAME }} \
