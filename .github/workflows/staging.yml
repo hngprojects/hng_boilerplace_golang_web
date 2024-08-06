@@ -7,10 +7,11 @@ on:
   pull_request:
     branches:
       - staging
+  workflow_dispatch:
 
 jobs:
   build_and_test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     env:
       TEST_USERNAME: postgres
       TEST_PASSWORD: password
@@ -60,7 +61,7 @@ jobs:
         run: go test ./... -timeout 99999s
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build_and_test
     if: github.event_name == 'push'
     env:
