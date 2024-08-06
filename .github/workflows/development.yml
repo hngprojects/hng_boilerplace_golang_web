@@ -1,0 +1,96 @@
+name: Build, Test, and Deploy for Development
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Set Golang
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.22.1"
+      - name: Build the application
+        run: go build -o learnai_dev
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db_name
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+        ports:
+          - 5432:5432
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Create the app config file
+        run: cp app-sample.env app.env
+      - name: Run The Project
+        run: nohup go run main.go > /dev/null 2>&1 &
+      - name: Wait for application to start
+        run: sleep 30s
+      - name: Test for reachability
+        run: curl http://localhost:8019
+      - name: Run All Tests
+        run: go test ./... -timeout 99999s
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    env:
+      SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+      PROCESS_NAME: run_learnai_dev
+
+    steps:
+      - name: SSH into server and deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USERNAME }}
+          password: ${{ env.SSH_PASSWORD }}
+          port: ${{ env.SSH_PORT }}
+          script: |
+            export APPROOT=~/deployments/development
+            export PATH=$PATH:~/.nvm/versions/node/v20.15.1/bin
+            export PATH=$PATH:/usr/local/go/bin
+
+            mkdir -p $APPROOT
+            cd $APPROOT
+
+            if [ -d "$APPROOT/.git" ]; then
+                # Navigate to the repository directory and pull changes
+                cd $APPROOT || { echo "Failed to navigate to web root directory"; exit 1; }
+                git reset --hard HEAD || { echo "Failed to reset local changes"; exit 1; }
+                git pull origin main || { echo "Failed to pull latest changes"; exit 1; }
+            else
+                git clone -b dev http://github.com/${{ github.repository }} . || { echo "Failed to clone repository"; exit 1; }
+            fi
+
+            cp app-sample.env app.env
+            go build -o ~/deployments/development/learnai_dev
+
+            # Check if pm2 is already running
+            if pm2 list | grep -q "${{ env.PROCESS_NAME }}"; then
+              echo "Process ${{ env.PROCESS_NAME }} is running. Restarting..."
+              pm2 restart "${{ env.PROCESS_NAME }}"
+            else
+              echo "Process ${{ env.PROCESS_NAME }} is not running. Starting..."
+              pm2 start "${{ env.PROCESS_NAME }}".sh
+            fi
