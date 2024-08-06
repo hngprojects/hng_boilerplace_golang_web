@@ -11,7 +11,7 @@ on:
 
 jobs:
   build_and_test:
-    runs-on: kimiko_runner3
+    runs-on: self-hosted
     env:
       TEST_USERNAME: postgres
       TEST_PASSWORD: password
@@ -61,7 +61,7 @@ jobs:
         run: go test ./... -timeout 99999s
 
   deploy:
-    runs-on: kimiko_runner3
+    runs-on: self-hosted
     needs: build_and_test
     if: github.event_name == 'push'
     env:
