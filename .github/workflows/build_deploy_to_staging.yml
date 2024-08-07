@@ -77,4 +77,5 @@ jobs:
               USERNAME=${{ secrets.USERNAME }} \
               APP_NAME=${{ env.APP_NAME }} \
               APP_URL=${{ env.APP_URL }} \
-              MIGRATE=${{ env.MIGRATE }}
+              MIGRATE=${{ env.MIGRATE }} \
+              HMAC_SECRET=${{ secrets.HMAC_SECRET }}
