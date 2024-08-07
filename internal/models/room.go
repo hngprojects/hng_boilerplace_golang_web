@@ -14,6 +14,7 @@ type Room struct {
 	ID          string    `gorm:"type:uuid;primary_key" json:"room_id"`
 	Name        string    `gorm:"column:name;unique type:text; not null" json:"name"`
 	Description string    `gorm:"column:description; type:text; not null" json:"description"`
+	OwnerId     string    `gorm:"column:owner_id; type:uuid" json:"owner_id"`
 	Users       []User    `gorm:"many2many:user_rooms;" json:"users"`
 	CreatedAt   time.Time `gorm:"column:created_at; not null; autoCreateTime" json:"created_at"`
 	DeletedAt   time.Time `gorm:"column: deleted_at; not null; autoDeleteTime" json:"deleted_at"`
@@ -29,8 +30,8 @@ type UserRoom struct {
 
 type CreateRoomRequest struct {
 	Username    string `json:"username" validate:"required"`
-	Name        string `json:"name" validate:"required"`
-	Description string `json:"description" validate:"required"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 type GetRoomRequest struct {
@@ -43,9 +44,8 @@ type JoinRoomRequest struct {
 	UserID   string `json:"user_id" `
 }
 
-type UpdateRoomRequest struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+type UpdateRoomUserNameReq struct {
+	Username string `json:"username" validate:"required"`
 }
 
 func (r *Room) CreateRoom(db *gorm.DB) error {
@@ -56,7 +56,7 @@ func (r *Room) CreateRoom(db *gorm.DB) error {
 	return nil
 }
 
-func (r *Room) GetUsersInRoomByID(db *gorm.DB, roomID string) ([]UserRoom, error) {
+func (r *Room) GetRoomUsersByID(db *gorm.DB, roomID string) ([]UserRoom, error) {
 	var users []UserRoom
 
 	err := postgresql.SelectUsersFromDb(
@@ -72,6 +72,20 @@ func (r *Room) GetUsersInRoomByID(db *gorm.DB, roomID string) ([]UserRoom, error
 	}
 
 	return users, nil
+}
+
+func (r *Room) GetRoomByID(db *gorm.DB, roomID string) (Room, error) {
+	var room Room
+
+	err, nerr := postgresql.SelectOneFromDb(db, &room, "id = ?", roomID)
+	if nerr != nil {
+		return room, err
+	}
+	if err != nil {
+		return room, err
+	}
+
+	return room, nil
 }
 
 func (r *Room) GetRoomByID(db *gorm.DB, roomID string) (Room, error) {
@@ -185,6 +199,57 @@ func (r *Room) RemoveUserFromRoom(db *gorm.DB, roomID, userID string) error {
 	if err != nil {
 		return errors.New("could not remove user from room")
 	}
+	return nil
+}
+
+func (r *UserRoom) UpdateUsername(db *gorm.DB, req UpdateRoomUserNameReq, roomId, userId string) error {
+
+	var userRoom UserRoom
+
+	query := "room_id = ? AND user_id = ?"
+
+	exist := postgresql.CheckExists(db, &userRoom, query, roomId, userId)
+	if !exist {
+		return errors.New("user not in room")
+	}
+
+	result, err := postgresql.UpdateFields(db, &r, req, query, roomId, userId)
+	if err != nil {
+		return err
+	}
+
+	if result.RowsAffected == 0 {
+		return errors.New("failed to update username")
+	}
+
+	return nil
+}
+
+func (c *Room) Delete(db *gorm.DB) error {
+
+	err := db.Model(UserRoom{}).Where("room_id = ?", c.ID).Delete(UserRoom{}).Error
+
+	if err != nil {
+		return errors.New("error removing users in room")
+	}
+
+	err = postgresql.DeleteRecordFromDb(db, &c)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *UserRoom) UserInRoom(db *gorm.DB, roomID, userID string) error {
+
+	var userRoom UserRoom
+
+	exist := postgresql.CheckExists(db, &userRoom, "room_id = ? AND user_id = ?", roomID, userID)
+	if !exist {
+		return errors.New("user not in room")
+	}
+
 	return nil
 }
 

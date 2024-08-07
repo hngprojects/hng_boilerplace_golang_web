@@ -269,6 +269,88 @@ func (base *Controller) LeaveRoom(c *gin.Context) {
 	c.JSON(code, rd)
 }
 
+func (base *Controller) UpdateUsername(c *gin.Context) {
+	var req models.UpdateRoomUserNameReq
+
+	roomId := c.Param("roomId")
+
+	if _, err := uuid.Parse(roomId); err != nil {
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "invalid room id format", errors.New("failed to parse room id"), nil)
+		c.JSON(http.StatusBadRequest, rd)
+		return
+	}
+
+	claims, exists := c.Get("userClaims")
+	if !exists {
+		base.Logger.Info("error getting claims")
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "error getting claims", nil, nil)
+		c.JSON(http.StatusBadRequest, rd)
+		return
+	}
+	userClaims := claims.(jwt.MapClaims)
+	userId := userClaims["user_id"].(string)
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		base.Logger.Info("error parsing request body")
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+		c.JSON(http.StatusBadRequest, rd)
+		return
+	}
+
+	err = base.Validator.Struct(&req)
+	if err != nil {
+		base.Logger.Info("validation failed")
+		rd := utility.BuildErrorResponse(http.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, base.Validator), nil)
+		c.JSON(http.StatusUnprocessableEntity, rd)
+		return
+	}
+
+	code, err := room.UpdateUsername(req, base.Db.Postgresql, roomId, userId)
+	if err != nil {
+		base.Logger.Info("error creating room")
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
+		c.JSON(code, rd)
+		return
+	}
+
+	base.Logger.Info("username updated successfully")
+	rd := utility.BuildSuccessResponse(code, "username updated successfully", nil)
+	c.JSON(code, rd)
+}
+
+func (base *Controller) DeleteRoom(c *gin.Context) {
+
+	RoomId := c.Param("roomId")
+
+	if _, err := uuid.Parse(RoomId); err != nil {
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "invalid room id format", errors.New("failed to parse room id"), nil)
+		c.JSON(http.StatusBadRequest, rd)
+		return
+	}
+	claims, exists := c.Get("userClaims")
+
+	if !exists {
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "unable to get user claims", errors.New("user not authorized"), nil)
+		c.JSON(http.StatusBadRequest, rd)
+		return
+	}
+	userClaims := claims.(jwt.MapClaims)
+
+	UserId := userClaims["user_id"].(string)
+
+	code, err := room.DeleteRoom(base.Db.Postgresql, RoomId, UserId)
+	if err != nil {
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
+		c.JSON(http.StatusBadRequest, rd)
+		return
+	}
+
+	base.Logger.Info("room deleted successfully")
+	rd := utility.BuildSuccessResponse(http.StatusOK, "room deleted successfully", nil)
+	c.JSON(code, rd)
+}
+
 func (base *Controller) GetRoomByName(c *gin.Context) {
 	name := c.Params.ByName("roomName")
 
