@@ -48,13 +48,7 @@ jobs:
       - name: Run the application
         run: nohup ./telex_be > /dev/null 2>&1 &
       - name: Wait for application to start
-        run: |
-          for i in {1..30}; do
-            if curl http://localhost:8019; then
-              break
-            fi
-            sleep 1
-          done
+        run: sleep 30s
       - name: Test for reachability
         run: curl http://localhost:8019
       - name: Run All Tests
