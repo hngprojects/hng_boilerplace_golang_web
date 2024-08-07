@@ -14,7 +14,7 @@ jobs:
     env:
       TEST_USERNAME: postgres
       TEST_PASSWORD: password
-      TEST_DB_NAME: test_db
+      TEST_DB_NAME: db_name # must match details in app-sample.env
       TEST_DB_HOST: localhost
       TEST_DB_PORT: 5432
       TEST_MIGRATE: true
