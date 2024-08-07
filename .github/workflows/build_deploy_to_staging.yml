@@ -10,7 +10,7 @@ on:
 
 jobs:
   build_and_test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     env:
       TEST_USERNAME: postgres
       TEST_PASSWORD: password
@@ -29,10 +29,10 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-           --health-cmd="pg_isready -U $TEST_USERNAME -d $TEST_DB_NAME"
-           --health-interval=10s
-           --health-timeout=5s
-           --health-retries=5
+          --health-cmd="pg_isready -U $TEST_USERNAME -d $TEST_DB_NAME"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout Code
@@ -61,7 +61,7 @@ jobs:
         run: go test ./... -timeout 300s
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build_and_test
     if: github.event_name == 'push'
     env:
@@ -84,4 +84,3 @@ jobs:
               APP_NAME=${{ env.APP_NAME }} \
               APP_URL=${{ env.APP_URL }} \
               MIGRATE=${{ env.MIGRATE }}
-              
