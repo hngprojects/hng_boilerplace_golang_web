@@ -10,11 +10,11 @@ on:
 
 jobs:
   build_and_test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     env:
       TEST_USERNAME: postgres
       TEST_PASSWORD: password
-      TEST_DB_NAME: test_db
+      TEST_DB_NAME: db_name # must match details in app-sample.env
       TEST_DB_HOST: localhost
       TEST_DB_PORT: 5432
       TEST_MIGRATE: true
@@ -29,10 +29,10 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-           --health-cmd="pg_isready -U $TEST_USERNAME -d $TEST_DB_NAME"
-           --health-interval=10s
-           --health-timeout=5s
-           --health-retries=5
+          --health-cmd="pg_isready -U $TEST_USERNAME -d $TEST_DB_NAME"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout Code
@@ -48,20 +48,14 @@ jobs:
       - name: Run the application
         run: nohup ./telex_be > /dev/null 2>&1 &
       - name: Wait for application to start
-        run: |
-          for i in {1..30}; do
-            if curl http://localhost:8019; then
-              break
-            fi
-            sleep 1
-          done
+        run: sleep 30s
       - name: Test for reachability
         run: curl http://localhost:8019
       - name: Run All Tests
         run: go test ./... -timeout 300s
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build_and_test
     if: github.event_name == 'push'
     env:
@@ -84,4 +78,3 @@ jobs:
               APP_NAME=${{ env.APP_NAME }} \
               APP_URL=${{ env.APP_URL }} \
               MIGRATE=${{ env.MIGRATE }}
-              
