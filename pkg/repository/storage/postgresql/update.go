@@ -36,3 +36,11 @@ func SaveAllModelsFields(db *gorm.DB, models []interface{}) (*gorm.DB, error) {
 
 	return tx, nil
 }
+
+func UpdateFields(db *gorm.DB, model interface{}, updates interface{}, query interface{}, args...interface{}) (*gorm.DB, error) {
+	result := db.Model(model).Where(query, args...).Updates(updates)
+	if result.Error != nil {
+		return result, result.Error
+	}
+	return result, nil
+}

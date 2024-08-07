@@ -5,9 +5,9 @@ import "github.com/hngprojects/hng_boilerplate_golang_web/internal/models"
 // _ = db.AutoMigrate(MigrationModels()...)
 func AuthMigrationModels() []interface{} {
 	return []interface{}{
+		models.User{},
 		models.AccessToken{},
 		models.Room{},
-		models.User{},
 		models.Profile{},
 		models.UserRoom{},
 		models.Message{},
