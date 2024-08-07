@@ -48,11 +48,21 @@ func CreateRoom(req models.CreateRoomRequest, db *gorm.DB, userId string) (model
 func GetRoom(db *gorm.DB, roomID string) ([]models.UserRoom, int, error) {
 	var room models.Room
 
-	fetchedUsers, err := room.GetRoomByID(db, roomID)
+	fetchedUsers, err := room.GetUsersInRoomByID(db, roomID)
 	if err != nil {
 		return fetchedUsers, http.StatusBadRequest, err
 	}
 	return fetchedUsers, http.StatusOK, nil
+}
+
+func GetRoomByName(db *gorm.DB, name string) (models.Room, int, error) {
+	var r models.Room
+
+	room, err := r.GetRoomByName(db, name)
+	if err != nil {
+		return room, http.StatusBadRequest, err
+	}
+	return room, http.StatusOK, nil
 }
 
 func GetRoomMsg(roomId, userID string, db *gorm.DB) ([]models.Message, int, error) {
@@ -111,4 +121,25 @@ func AddRoomMsg(req models.CreateMessageRequest, db *gorm.DB) (int, error) {
 	}
 
 	return http.StatusCreated, nil
+}
+
+func CountRoomUsers(db *gorm.DB, roomId string) (int, int, error) {
+	var userRoom models.UserRoom
+
+	count, err := userRoom.CountRoomUsers(db, roomId)
+	if err != nil {
+		return count, http.StatusBadRequest, err
+	}
+	return count, http.StatusOK, nil
+}
+
+func UpdateRoom(db *gorm.DB, req models.UpdateRoomRequest, roomId string) (models.Room, error) {
+	var (
+		room models.Room
+	)
+	updatedRoom, _, err := room.UpdateRoom(db, req, roomId)
+	if err != nil {
+		return updatedRoom, err
+	}
+	return updatedRoom, nil
 }

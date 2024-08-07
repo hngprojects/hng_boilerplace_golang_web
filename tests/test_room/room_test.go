@@ -56,6 +56,8 @@ func TestRoomEndpoints(t *testing.T) {
 
 	room_id := tst.CreateRoom(t, r, roomController, db, createRoomReq, token)
 
+	fmt.Println("Room ID: ", room_id)
+
 	tests := []struct {
 		Name         string
 		RequestBody  interface{}

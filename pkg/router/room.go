@@ -19,13 +19,17 @@ func Room(r *gin.Engine, ApiVersion string, validator *validator.Validate, db *s
 
 	roomUrl := r.Group(fmt.Sprintf("%v/rooms", ApiVersion), middleware.Authorize(db.Postgresql))
 	{
-		roomUrl.GET("/", room.GetRooms)
-		roomUrl.POST("/", room.CreateRoom)
-		roomUrl.GET("/:roomId", room.GetRoom)
-		roomUrl.GET("/:roomId/messages", room.GetRoomMsg)
-		roomUrl.POST("/:roomId/messages", room.AddRoomMsg)
-		roomUrl.POST("/:roomId/join", room.JoinRoom)
-		roomUrl.POST("/:roomId/leave", room.LeaveRoom)
+			roomUrl.POST("/", room.CreateRoom)
+			roomUrl.POST("/:roomId/messages", room.AddRoomMsg)
+			roomUrl.POST("/:roomId/join", room.JoinRoom)
+			roomUrl.POST("/:roomId/leave", room.LeaveRoom)
+			roomUrl.GET("/", room.GetRooms)
+			roomUrl.GET("/:roomId", room.GetRoom)
+			roomUrl.GET("/:roomId/messages", room.GetRoomMsg)
+
+			roomUrl.GET("/name/:roomName", room.GetRoomByName)
+			roomUrl.GET("/:roomId/num-users", room.CountRoomUsers)
+			roomUrl.PATCH("/:roomId", room.UpdateRoom)
 	}
 	return r
 }
