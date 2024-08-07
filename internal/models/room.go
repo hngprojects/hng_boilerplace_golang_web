@@ -83,7 +83,7 @@ func (r *Room) GetRoomUsersByID(db *gorm.DB, roomID string) ([]UserRoom, error) 
 func (r *Room) GetRoomByID(db *gorm.DB, roomID string) (Room, error) {
 	var room Room
 
-	err, _ := postgresql.SelectOneFromDb(db, &room, "room_id= ?", roomID)
+	err, _ := postgresql.SelectOneFromDb(db, &room, "id = ?", roomID)
 	if err != nil {
 		return room, errors.New("room not found")
 	}
@@ -266,7 +266,7 @@ func (r *Room) UpdateRoom(db *gorm.DB, req UpdateRoomRequest, roomID string) (Ro
 	var room Room
 	room.ID = roomID
 
-	exists := postgresql.CheckExists(db, &room, "room_id = ?", roomID)
+	exists := postgresql.CheckExists(db, &room, "id = ?", roomID)
 	if !exists {
 		return room, http.StatusNotFound, errors.New("room does not exist")
 	}
@@ -280,7 +280,7 @@ func (r *Room) UpdateRoom(db *gorm.DB, req UpdateRoomRequest, roomID string) (Ro
 	}
 
 	updatedRoom := Room{}
-	err = db.First(&updatedRoom, "room_id = ?", roomID).Error
+	err = db.First(&updatedRoom, "id = ?", roomID).Error
 	if err != nil {
 		return room, http.StatusInternalServerError, err
 	}
