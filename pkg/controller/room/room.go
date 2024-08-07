@@ -314,8 +314,8 @@ func (base *Controller) UpdateUsername(c *gin.Context) {
 	}
 
 	base.Logger.Info("username updated successfully")
-	rd := utility.BuildSuccessResponse(http.StatusCreated, "username updated successfully", nil)
-	c.JSON(http.StatusCreated, rd)
+	rd := utility.BuildSuccessResponse(code, "username updated successfully", nil)
+	c.JSON(code, rd)
 }
 
 func (base *Controller) DeleteRoom(c *gin.Context) {

@@ -118,7 +118,7 @@ func TestRoomEndpoints(t *testing.T) {
 			Name:         "Join Room Action",
 			ExpectedCode: http.StatusOK,
 			Message:      "room joined successfully",
-			RequestBody:  models.JoinRoomRequest{
+			RequestBody: models.JoinRoomRequest{
 				Username: userSignUpData.UserName,
 			},
 			Method:     http.MethodPost,
@@ -127,7 +127,30 @@ func TestRoomEndpoints(t *testing.T) {
 				"Content-Type":  "application/json",
 				"Authorization": "Bearer " + token,
 			},
-		}, 
+		}, {
+			Name:         "Update Room Username Action",
+			ExpectedCode: http.StatusOK,
+			Message:      "username updated successfully",
+			RequestBody: models.UpdateRoomUserNameReq{
+				Username: fmt.Sprintf("username%v", currUUID),
+			},
+			Method:     http.MethodPatch,
+			RequestURI: url.URL{Path: fmt.Sprintf("/api/v1/rooms/%s/username", room_id)},
+			Headers: map[string]string{
+				"Content-Type":  "application/json",
+				"Authorization": "Bearer " + token,
+			},
+		}, {
+			Name:         "Delete Room Action",
+			ExpectedCode: http.StatusOK,
+			Message:      "room deleted successfully",
+			Method:       http.MethodDelete,
+			RequestURI:   url.URL{Path: fmt.Sprintf("/api/v1/rooms/%s", room_id)},
+			Headers: map[string]string{
+				"Content-Type":  "application/json",
+				"Authorization": "Bearer " + token,
+			},
+		},
 	}
 
 	room := room.Controller{Db: db, Validator: validatorRef, Logger: logger}
@@ -142,6 +165,8 @@ func TestRoomEndpoints(t *testing.T) {
 			roomUrl.GET("/:roomId", room.GetRoom)
 			roomUrl.POST("/:roomId/join", room.JoinRoom)
 			roomUrl.POST("/:roomId/leave", room.LeaveRoom)
+			roomUrl.PATCH("/:roomId/username", room.UpdateUsername)
+			roomUrl.DELETE("/:roomId", room.DeleteRoom)
 		}
 
 		t.Run(test.Name, func(t *testing.T) {
