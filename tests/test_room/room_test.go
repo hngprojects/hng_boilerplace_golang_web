@@ -54,7 +54,7 @@ func TestRoomEndpoints(t *testing.T) {
 		Username:    userSignUpData.UserName,
 	}
 
-	room_id := tst.CreateRoom(t, r, roomController, db, createRoomReq, token)
+	room_id, roomName := tst.CreateRoom(t, r, roomController, db, createRoomReq, token)
 
 	fmt.Println("Room ID: ", room_id)
 
@@ -142,7 +142,33 @@ func TestRoomEndpoints(t *testing.T) {
 				"Content-Type":  "application/json",
 				"Authorization": "Bearer " + token,
 			},
-		}, {
+			}, {
+			Name:         "Update Room Action",
+			ExpectedCode: http.StatusOK,
+			RequestBody:  models.UpdateRoomRequest{
+				Name: "Normal",
+			},
+			Message:    "Room updated successfully",
+			Method:     http.MethodPatch,
+			RequestURI: url.URL{Path: fmt.Sprintf("/api/v1/rooms/%s", room_id)},
+			Headers: map[string]string{
+				"Content-Type":  "application/json",
+				"Authorization": "Bearer " + token,
+			},
+		},{
+			Name:         "Get Room by Name Action",
+			ExpectedCode: http.StatusOK,
+			RequestBody:  models.UpdateRoomRequest{
+				Name: "Normal",
+			},
+			Message:    "room name retrieved successfully",
+			Method:     http.MethodGet,
+			RequestURI: url.URL{Path: fmt.Sprintf("/api/v1/rooms/name/%s", roomName)},
+			Headers: map[string]string{
+				"Content-Type":  "application/json",
+				"Authorization": "Bearer " + token,
+			},
+		},{
 			Name:         "Delete Room Action",
 			ExpectedCode: http.StatusOK,
 			Message:      "room deleted successfully",
@@ -168,6 +194,9 @@ func TestRoomEndpoints(t *testing.T) {
 			roomUrl.POST("/:roomId/join", room.JoinRoom)
 			roomUrl.POST("/:roomId/leave", room.LeaveRoom)
 			roomUrl.PATCH("/:roomId/username", room.UpdateUsername)
+			roomUrl.GET("/name/:roomName", room.GetRoomByName)
+			roomUrl.GET("/:roomId/num-users", room.CountRoomUsers)
+			roomUrl.PATCH("/:roomId", room.UpdateRoom)
 			roomUrl.DELETE("/:roomId", room.DeleteRoom)
 		}
 

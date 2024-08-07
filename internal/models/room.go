@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -44,6 +45,11 @@ type JoinRoomRequest struct {
 	UserID   string `json:"user_id" `
 }
 
+type UpdateRoomRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
 type UpdateRoomUserNameReq struct {
 	Username string `json:"username" validate:"required"`
 }
@@ -72,20 +78,6 @@ func (r *Room) GetRoomUsersByID(db *gorm.DB, roomID string) ([]UserRoom, error) 
 	}
 
 	return users, nil
-}
-
-func (r *Room) GetRoomByID(db *gorm.DB, roomID string) (Room, error) {
-	var room Room
-
-	err, nerr := postgresql.SelectOneFromDb(db, &room, "id = ?", roomID)
-	if nerr != nil {
-		return room, err
-	}
-	if err != nil {
-		return room, err
-	}
-
-	return room, nil
 }
 
 func (r *Room) GetRoomByID(db *gorm.DB, roomID string) (Room, error) {
@@ -181,6 +173,7 @@ func (r *Room) AddUserToRoom(db *gorm.DB, req JoinRoomRequest) error {
 	}
 
 	err := postgresql.CreateOneRecord(db, &userRoom)
+	fmt.Println(err)
 	if err != nil {
 		return errors.New("could not add user to room")
 	}
@@ -263,7 +256,7 @@ func (u *UserRoom) CountRoomUsers(db *gorm.DB, roomID string) (int, error) {
 
 	err := postgresql.SelectAllFromDb(db, "", &users, "room_id = ?", roomID)
 	if err != nil {
-		return 0 , err
+		return 0, err
 	}
 
 	return len(users), nil

@@ -105,7 +105,7 @@ func GetLoginToken(t *testing.T, r *gin.Engine, auth auth.Controller, loginData 
 	return token
 }
 
-func CreateRoom(t *testing.T, r *gin.Engine, room room.Controller, db *storage.Database, CreateData models.CreateRoomRequest, token string) string {
+func CreateRoom(t *testing.T, r *gin.Engine, room room.Controller, db *storage.Database, CreateData models.CreateRoomRequest, token string) (string, string) {
 	var (
 		createPath = "/api/v1/rooms/"
 		createURI  = url.URL{Path: createPath}
@@ -130,12 +130,13 @@ func CreateRoom(t *testing.T, r *gin.Engine, room room.Controller, db *storage.D
 	r.ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusCreated {
-		return ""
+		return "", ""
 	}
 
 	data := ParseResponse(rr)
 	dataM := data["data"].(map[string]interface{})
 	roomID := dataM["room_id"].(string)
+	roomName := dataM["name"].(string)
 
-	return roomID
+	return roomID, roomName
 }

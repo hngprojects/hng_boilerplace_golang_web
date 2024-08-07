@@ -320,16 +320,16 @@ func (base *Controller) UpdateUsername(c *gin.Context) {
 }
 
 func (base *Controller) DeleteRoom(c *gin.Context) {
-
+	
 	RoomId := c.Param("roomId")
-
+	
 	if _, err := uuid.Parse(RoomId); err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "invalid room id format", errors.New("failed to parse room id"), nil)
 		c.JSON(http.StatusBadRequest, rd)
 		return
 	}
+	
 	claims, exists := c.Get("userClaims")
-
 	if !exists {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "unable to get user claims", errors.New("user not authorized"), nil)
 		c.JSON(http.StatusBadRequest, rd)
@@ -362,8 +362,8 @@ func (base *Controller) GetRoomByName(c *gin.Context) {
 		return
 	}
 
-	base.Logger.Info("room retrieved successfully")
-	rd := utility.BuildSuccessResponse(http.StatusOK, "room retreived successfully", respData)
+	base.Logger.Info("room name retrieved successfully")
+	rd := utility.BuildSuccessResponse(http.StatusOK, "room name retrieved successfully", respData)
 	c.JSON(http.StatusOK, rd)
 }
 
@@ -391,7 +391,7 @@ func (base *Controller) CountRoomUsers(c *gin.Context) {
 }
 
 func (base *Controller) UpdateRoom(c *gin.Context) {
-	id := c.Param("room_id")
+	id := c.Param("roomId")
 	var req models.UpdateRoomRequest
 
 	if _, err := uuid.Parse(id); err != nil {

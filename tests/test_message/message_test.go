@@ -55,7 +55,7 @@ func TestMessage(t *testing.T) {
 
 	token := tst.GetLoginToken(t, r, auth, loginData)
 
-	roomId := tst.CreateRoom(t, r, room, db, createRoomData, token)
+	roomId, _ := tst.CreateRoom(t, r, room, db, createRoomData, token)
 
 	tests := []struct {
 		Name         string
