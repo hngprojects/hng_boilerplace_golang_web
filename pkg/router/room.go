@@ -26,6 +26,8 @@ func Room(r *gin.Engine, ApiVersion string, validator *validator.Validate, db *s
 		roomUrl.POST("/:roomId/messages", room.AddRoomMsg)
 		roomUrl.POST("/:roomId/join", room.JoinRoom)
 		roomUrl.POST("/:roomId/leave", room.LeaveRoom)
+		roomUrl.DELETE("/:roomId", room.DeleteRoom)
+		roomUrl.PATCH("/:roomId/username", room.UpdateUsername)
 	}
 	return r
 }

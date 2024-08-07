@@ -26,6 +26,7 @@ func CreateRoom(req models.CreateRoomRequest, db *gorm.DB, userId string) (model
 	room := models.Room{
 		ID:          utility.GenerateUUID(),
 		Name:        req.Name,
+		OwnerId:     userId,
 		Description: req.Description,
 	}
 
@@ -48,7 +49,7 @@ func CreateRoom(req models.CreateRoomRequest, db *gorm.DB, userId string) (model
 func GetRoom(db *gorm.DB, roomID string) ([]models.UserRoom, int, error) {
 	var room models.Room
 
-	fetchedUsers, err := room.GetRoomByID(db, roomID)
+	fetchedUsers, err := room.GetRoomUsersByID(db, roomID)
 	if err != nil {
 		return fetchedUsers, http.StatusBadRequest, err
 	}
@@ -111,4 +112,37 @@ func AddRoomMsg(req models.CreateMessageRequest, db *gorm.DB) (int, error) {
 	}
 
 	return http.StatusCreated, nil
+}
+
+func UpdateUsername(req models.UpdateRoomUserNameReq, db *gorm.DB, roomId, userId string) (int, error) {
+
+	var userroom models.UserRoom
+
+	err := userroom.UpdateUsername(db, req, roomId, userId)
+	if err != nil {
+		return http.StatusBadRequest, err
+	}
+
+	return http.StatusOK, nil
+}
+
+func DeleteRoom(db *gorm.DB, roomId, userId string) (int, error) {
+	var room models.Room
+
+	room, err := room.GetRoomByID(db, roomId)
+
+	if room.OwnerId != userId {
+		return http.StatusUnauthorized, errors.New("user not authorized")
+	}
+
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	err = room.Delete(db)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
 }
