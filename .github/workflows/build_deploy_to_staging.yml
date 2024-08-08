@@ -72,7 +72,7 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            bash ./scripts/deploy_app.sh SERVER_PORT=${{ secrets.SERVER_PORT }} \
+            bash ./scripts/deploy_staging.sh SERVER_PORT=${{ secrets.SERVER_PORT }} \
               DB_NAME=${{ secrets.DB_NAME }} \
               USERNAME=${{ secrets.USERNAME }} \
               APP_NAME=${{ env.APP_NAME }} \
