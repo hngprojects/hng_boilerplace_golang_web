@@ -2,7 +2,6 @@ package room
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -142,8 +141,6 @@ func DeleteRoom(db *gorm.DB, roomId, userId string) (int, error) {
 	var room models.Room
 
 	room, err := room.GetRoomByID(db, roomId)
-
-	fmt.Println(room.OwnerId, userId)
 
 	if room.OwnerId != userId {
 		return http.StatusUnauthorized, errors.New("user not authorized")

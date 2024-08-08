@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -150,12 +149,12 @@ func (r *Room) AddUserToRoom(db *gorm.DB, req JoinRoomRequest) error {
 		roomID = req.RoomID
 	)
 
-	exists := postgresql.CheckExists(db, &user, "user_id = ?", userID)
+	exists := postgresql.CheckExists(db, &user, "id = ?", userID)
 	if !exists {
 		return errors.New("user does not exist")
 	}
 
-	exists = postgresql.CheckExists(db, &room, "room_id = ?", roomID)
+	exists = postgresql.CheckExists(db, &room, "id = ?", roomID)
 	if !exists {
 		return errors.New("room does not exist")
 	}
@@ -173,7 +172,6 @@ func (r *Room) AddUserToRoom(db *gorm.DB, req JoinRoomRequest) error {
 	}
 
 	err := postgresql.CreateOneRecord(db, &userRoom)
-	fmt.Println(err)
 	if err != nil {
 		return errors.New("could not add user to room")
 	}
