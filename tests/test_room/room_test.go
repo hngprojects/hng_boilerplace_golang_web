@@ -49,7 +49,7 @@ func TestRoomEndpoints(t *testing.T) {
 	token := tst.GetLoginToken(t, r, auth, loginData)
 
 	createRoomReq := models.CreateRoomRequest{
-		Name:        "Test Room",
+		Name:        "Test-Room",
 		Description: "This is a test room",
 		Username:    userSignUpData.UserName,
 	}
@@ -68,7 +68,7 @@ func TestRoomEndpoints(t *testing.T) {
 		{
 			Name: "Create Room Action",
 			RequestBody: models.CreateRoomRequest{
-				Name:        "Test Room",
+				Name:        "Test-Room",
 				Description: "This is a test room",
 				Username:    userSignUpData.UserName,
 			},
@@ -181,6 +181,16 @@ func TestRoomEndpoints(t *testing.T) {
 				"Authorization": "Bearer " + token,
 			},
 		}, {
+			Name: "Search Room by Name Action",
+			Message: "room names retrieved successfully",
+			ExpectedCode: http.StatusOK,
+			Method: http.MethodGet,
+			RequestURI: url.URL{Path: fmt.Sprintf("/api/v1/rooms/search/%s", roomName)},
+			Headers: map[string]string{
+				"Content-Type":  "application/json",
+				"Authorization": "Bearer " + token,
+			},
+		},{
 			Name:         "Delete Room Action",
 			ExpectedCode: http.StatusOK,
 			Message:      "room deleted successfully",
@@ -211,6 +221,7 @@ func TestRoomEndpoints(t *testing.T) {
 			roomUrl.PATCH("/:roomId", room.UpdateRoom)
 			roomUrl.DELETE("/:roomId", room.DeleteRoom)
 			roomUrl.GET("/:roomId/user-exist", room.CheckUser)
+			roomUrl.GET(("/search/:roomName"), room.SearchRoomByNames)
 		}
 
 		t.Run(test.Name, func(t *testing.T) {

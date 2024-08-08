@@ -320,15 +320,15 @@ func (base *Controller) UpdateUsername(c *gin.Context) {
 }
 
 func (base *Controller) DeleteRoom(c *gin.Context) {
-	
+
 	RoomId := c.Param("roomId")
-	
+
 	if _, err := uuid.Parse(RoomId); err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "invalid room id format", errors.New("failed to parse room id"), nil)
 		c.JSON(http.StatusBadRequest, rd)
 		return
 	}
-	
+
 	claims, exists := c.Get("userClaims")
 	if !exists {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "unable to get user claims", errors.New("user not authorized"), nil)
@@ -354,7 +354,7 @@ func (base *Controller) DeleteRoom(c *gin.Context) {
 func (base *Controller) GetRoomByName(c *gin.Context) {
 	name := c.Params.ByName("roomName")
 
-	respData, code, err := room.GetRoomByName(base.Db.Postgresql,name)
+	respData, code, err := room.GetRoomByName(base.Db.Postgresql, name)
 	if err != nil {
 		base.Logger.Info("error getting room")
 		rd := utility.BuildErrorResponse(code, "error", err.Error(), err, nil)
@@ -394,6 +394,16 @@ func (base *Controller) UpdateRoom(c *gin.Context) {
 	id := c.Param("roomId")
 	var req models.UpdateRoomRequest
 
+	claims, exists := c.Get("userClaims")
+	if !exists {
+		base.Logger.Info("error getting claims")
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "unable to get user claims", errors.New("user not authorized"), nil)
+		c.JSON(http.StatusBadRequest, rd)
+		return
+	}
+	userClaims := claims.(jwt.MapClaims)
+	userId := userClaims["user_id"].(string)
+
 	if _, err := uuid.Parse(id); err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "Invalid ID format", err, nil)
 		c.JSON(http.StatusBadRequest, rd)
@@ -412,7 +422,7 @@ func (base *Controller) UpdateRoom(c *gin.Context) {
 		return
 	}
 
-	result, err := room.UpdateRoom(base.Db.Postgresql, req ,id)
+	result, err := room.UpdateRoom(base.Db.Postgresql, req, id, userId)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			rd := utility.BuildErrorResponse(http.StatusNotFound, "error", "Room not found", err, nil)
@@ -428,7 +438,6 @@ func (base *Controller) UpdateRoom(c *gin.Context) {
 	rd := utility.BuildSuccessResponse(http.StatusOK, "Room updated successfully", result)
 	c.JSON(http.StatusOK, rd)
 }
-
 
 func (base *Controller) CheckUser(c *gin.Context) {
 
@@ -460,4 +469,27 @@ func (base *Controller) CheckUser(c *gin.Context) {
 	base.Logger.Info("user checked successfully")
 	rd := utility.BuildSuccessResponse(http.StatusOK, "user checked successfully", respData)
 	c.JSON(code, rd)
+}
+
+func (base *Controller) SearchRoomByNames(c *gin.Context) {
+	name := c.Param("roomName")
+
+	rooms, paginationResponse, err := room.SearchRoomByNames(base.Db.Postgresql, c, name)
+	if err != nil {
+		base.Logger.Info("error fetching rooms")
+		rd := utility.BuildErrorResponse(http.StatusNotFound, "error", "failed to fetch rooms", err, nil)
+		c.JSON(http.StatusNotFound, rd)
+		return
+	}
+
+	paginationData := map[string]interface{}{
+		"current_page": paginationResponse.CurrentPage,
+		"total_pages":  paginationResponse.TotalPagesCount,
+		"page_size":    paginationResponse.PageCount,
+		"total_items":  len(rooms),
+	}
+
+	base.Logger.Info("room names retrieved successfully")
+	rd := utility.BuildSuccessResponse(http.StatusOK, "room names retrieved successfully", rooms, paginationData)
+	c.JSON(http.StatusOK, rd)
 }
