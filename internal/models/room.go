@@ -286,3 +286,17 @@ func (r *Room) UpdateRoom(db *gorm.DB, req UpdateRoomRequest, roomID string) (Ro
 	}
 	return updatedRoom, http.StatusOK, nil
 }
+
+func (r *UserRoom) CheckUser(db *gorm.DB, userID, roomID string) (bool, string) {
+
+	var (
+		userRoom UserRoom
+	)
+
+	exist := postgresql.CheckExists(db, &userRoom, "room_id = ? AND user_id = ?", roomID, userID)
+	if !exist {
+		return false, "user not in room"
+	}
+
+	return true, "user in room"
+}
