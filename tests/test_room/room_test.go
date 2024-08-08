@@ -56,8 +56,6 @@ func TestRoomEndpoints(t *testing.T) {
 
 	room_id, roomName := tst.CreateRoom(t, r, roomController, db, createRoomReq, token)
 
-	fmt.Println("Room ID: ", room_id)
-
 	tests := []struct {
 		Name         string
 		RequestBody  interface{}
@@ -142,10 +140,10 @@ func TestRoomEndpoints(t *testing.T) {
 				"Content-Type":  "application/json",
 				"Authorization": "Bearer " + token,
 			},
-			}, {
+		}, {
 			Name:         "Update Room Action",
 			ExpectedCode: http.StatusOK,
-			RequestBody:  models.UpdateRoomRequest{
+			RequestBody: models.UpdateRoomRequest{
 				Name: "Normal",
 			},
 			Message:    "Room updated successfully",
@@ -155,10 +153,24 @@ func TestRoomEndpoints(t *testing.T) {
 				"Content-Type":  "application/json",
 				"Authorization": "Bearer " + token,
 			},
-		},{
+		},
+		{
+			Name:         "Check User In Room Action",
+			ExpectedCode: http.StatusOK,
+			RequestBody: models.UpdateRoomRequest{
+				Name: "Normal",
+			},
+			Message:    "user checked successfully",
+			Method:     http.MethodGet,
+			RequestURI: url.URL{Path: fmt.Sprintf("/api/v1/rooms/%s/user-exist", room_id)},
+			Headers: map[string]string{
+				"Content-Type":  "application/json",
+				"Authorization": "Bearer " + token,
+			},
+		}, {
 			Name:         "Get Room by Name Action",
 			ExpectedCode: http.StatusOK,
-			RequestBody:  models.UpdateRoomRequest{
+			RequestBody: models.UpdateRoomRequest{
 				Name: "Normal",
 			},
 			Message:    "room name retrieved successfully",
@@ -168,7 +180,7 @@ func TestRoomEndpoints(t *testing.T) {
 				"Content-Type":  "application/json",
 				"Authorization": "Bearer " + token,
 			},
-		},{
+		}, {
 			Name:         "Delete Room Action",
 			ExpectedCode: http.StatusOK,
 			Message:      "room deleted successfully",
@@ -198,6 +210,7 @@ func TestRoomEndpoints(t *testing.T) {
 			roomUrl.GET("/:roomId/num-users", room.CountRoomUsers)
 			roomUrl.PATCH("/:roomId", room.UpdateRoom)
 			roomUrl.DELETE("/:roomId", room.DeleteRoom)
+			roomUrl.GET("/:roomId/user-exist", room.CheckUser)
 		}
 
 		t.Run(test.Name, func(t *testing.T) {

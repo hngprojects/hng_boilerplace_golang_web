@@ -2,9 +2,9 @@ package room
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
 	"github.com/hngprojects/hng_boilerplate_golang_web/internal/models"
@@ -142,8 +142,6 @@ func DeleteRoom(db *gorm.DB, roomId, userId string) (int, error) {
 
 	room, err := room.GetRoomByID(db, roomId)
 
-	fmt.Println(room.OwnerId, userId)
-
 	if room.OwnerId != userId {
 		return http.StatusUnauthorized, errors.New("user not authorized")
 	}
@@ -179,4 +177,21 @@ func UpdateRoom(db *gorm.DB, req models.UpdateRoomRequest, roomId string) (model
 		return updatedRoom, err
 	}
 	return updatedRoom, nil
+}
+
+func CheckUser(roomId, userID string, db *gorm.DB) (gin.H, int, error) {
+	var (
+		userroom models.UserRoom
+		resp     gin.H
+	)
+
+	status, chk := userroom.CheckUser(db, userID, roomId)
+
+	resp = gin.H{
+		"exist": status,
+		"msg":   chk,
+	}
+
+	return resp, http.StatusOK, nil
+
 }

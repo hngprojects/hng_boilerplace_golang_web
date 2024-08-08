@@ -35,12 +35,12 @@ func Setup(logger *utility.Logger, validator *validator.Validate, db *storage.Da
 	Health(r, ApiVersion, validator, db, logger)
 	Auth(r, ApiVersion, validator, db, logger)
 	Room(r, ApiVersion, validator, db, logger)
-	TokenGen(r, ApiVersion, validator, db, logger)	
+	TokenGen(r, ApiVersion, validator, db, logger)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    200,
-			"message": "HNGi Golang Boilerplate",
+			"message": "HNGi Golang Telex BE",
 			"status":  http.StatusOK,
 		})
 	})

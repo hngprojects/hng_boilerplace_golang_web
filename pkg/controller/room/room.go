@@ -428,3 +428,36 @@ func (base *Controller) UpdateRoom(c *gin.Context) {
 	rd := utility.BuildSuccessResponse(http.StatusOK, "Room updated successfully", result)
 	c.JSON(http.StatusOK, rd)
 }
+
+
+func (base *Controller) CheckUser(c *gin.Context) {
+
+	RoomId := c.Param("roomId")
+
+	if _, err := uuid.Parse(RoomId); err != nil {
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "invalid room id format", errors.New("failed to parse room id"), nil)
+		c.JSON(http.StatusBadRequest, rd)
+		return
+	}
+	claims, exists := c.Get("userClaims")
+
+	if !exists {
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "unable to get user claims", errors.New("user not authorized"), nil)
+		c.JSON(http.StatusBadRequest, rd)
+		return
+	}
+	userClaims := claims.(jwt.MapClaims)
+
+	UserId := userClaims["user_id"].(string)
+
+	respData, code, err := room.CheckUser(RoomId, UserId, base.Db.Postgresql)
+	if err != nil {
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
+		c.JSON(http.StatusBadRequest, rd)
+		return
+	}
+
+	base.Logger.Info("user checked successfully")
+	rd := utility.BuildSuccessResponse(http.StatusOK, "user checked successfully", respData)
+	c.JSON(code, rd)
+}
