@@ -457,7 +457,7 @@ func (base *Controller) CheckUser(c *gin.Context) {
 		return
 	}
 
-	base.Logger.Info("room messages fetched successfully")
-	rd := utility.BuildSuccessResponse(http.StatusOK, "room messages fetched successfully", respData)
+	base.Logger.Info("user checked successfully")
+	rd := utility.BuildSuccessResponse(http.StatusOK, "user checked successfully", respData)
 	c.JSON(code, rd)
 }
