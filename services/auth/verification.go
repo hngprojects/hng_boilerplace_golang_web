@@ -75,7 +75,7 @@ func VerifyEmailReq(userEmail string, db *gorm.DB, extReq request.ExternalReques
 	return "success", http.StatusOK, nil
 }
 
-func VerifyEmailToken(req models.ResetPasswordRequestModel, db *gorm.DB) (*models.User, int, error) {
+func VerifyEmailToken(req models.VerifyEmailTokenReqModel, db *gorm.DB) (*models.User, int, error) {
 
 	var (
 		user      = models.User{}

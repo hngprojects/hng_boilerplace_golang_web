@@ -48,13 +48,13 @@ func (base *Controller) RegisterUser(c *gin.Context) {
 	respData, code, err := auth.CreateUser(reqData, base.Db.Postgresql)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
-		base.Logger.Error("error sending token: ", err.Error())
+		base.Logger.Error("error saving user: ", err.Error())
 		c.JSON(http.StatusBadRequest, rd)
 		return
 	}
 
-	base.Logger.Info("verification email sent successfully")
-	rd := utility.BuildSuccessResponse(http.StatusCreated, "verification email sent successfully", respData)
+	base.Logger.Info("user created successfully")
+	rd := utility.BuildSuccessResponse(http.StatusCreated, "user created successfully", respData)
 	c.JSON(code, rd)
 }
 
@@ -89,8 +89,8 @@ func (base *Controller) CreateAdmin(c *gin.Context) {
 		return
 	}
 
-	base.Logger.Info("verification email sent successfully")
-	rd := utility.BuildSuccessResponse(http.StatusCreated, "verification email sent successfully", respData)
+	base.Logger.Info("user created successfully")
+	rd := utility.BuildSuccessResponse(http.StatusCreated, "user created successfully", respData)
 	c.JSON(code, rd)
 }
 

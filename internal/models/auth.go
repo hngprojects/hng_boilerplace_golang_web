@@ -54,6 +54,14 @@ type GoogleRequestModel struct {
 	Token string `json:"id_token" validate:"required"`
 }
 
+type VerifyEmailRequestModel struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+type VerifyEmailTokenReqModel struct {
+	Token       string `json:"token" validate:"required"`
+}
+
 type GoogleClaims struct {
 	Iss           string `json:"iss"`
 	Azp           string `json:"azp"`
@@ -74,6 +82,7 @@ type FacebookClaims struct {
 type FacebookRequestModel struct {
 	Token string `json:"id_token" validate:"required"`
 }
+
 
 func (p *PasswordReset) CreatePasswordReset(db *gorm.DB) error {
 

@@ -12,7 +12,7 @@ import (
 
 func (base *Controller) VerifyEmailToken(c *gin.Context) {
 	var (
-		req = models.ResetPasswordRequestModel{}
+		req = models.VerifyEmailTokenReqModel{}
 	)
 
 	err := c.ShouldBind(&req)
@@ -46,7 +46,7 @@ func (base *Controller) VerifyEmailToken(c *gin.Context) {
 
 func (base *Controller) VerifyEmailReq(c *gin.Context) {
 	var (
-		req = models.ForgotPasswordRequestModel{}
+		req = models.VerifyEmailRequestModel{}
 	)
 
 	err := c.ShouldBind(&req)

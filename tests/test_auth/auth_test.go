@@ -47,7 +47,7 @@ func TestUserSignup(t *testing.T) {
 				UserName:    fmt.Sprintf("test_username%v", currUUID),
 			},
 			ExpectedCode: http.StatusCreated,
-			Message:      "verification email sent successfully",
+			Message:      "user created successfully",
 		}, {
 			Name: "details already exist",
 			RequestBody: models.CreateUserRequestModel{
@@ -157,7 +157,7 @@ func TestAdminSignup(t *testing.T) {
 				UserName:    fmt.Sprintf("test_username%v", currUUID),
 			},
 			ExpectedCode: http.StatusCreated,
-			Message:      "verification email sent successfully",
+			Message:      "user created successfully",
 		}, {
 			Name: "details already exist",
 			RequestBody: models.CreateUserRequestModel{

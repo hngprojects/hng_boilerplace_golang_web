@@ -6,18 +6,13 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
-	"github.com/hngprojects/telex_be/internal/config"
 	"github.com/hngprojects/telex_be/internal/models"
 	"github.com/hngprojects/telex_be/pkg/middleware"
-	"github.com/hngprojects/telex_be/pkg/repository/storage"
 	"github.com/hngprojects/telex_be/pkg/repository/storage/postgresql"
-	"github.com/hngprojects/telex_be/services/actions"
-	"github.com/hngprojects/telex_be/services/actions/names"
 	"github.com/hngprojects/telex_be/utility"
 )
 
@@ -94,35 +89,6 @@ func CreateUser(req models.CreateUserRequestModel, db *gorm.DB) (gin.H, int, err
 	}
 
 	err = user.CreateUser(db)
-	if err != nil {
-		return nil, http.StatusInternalServerError, err
-	}
-
-	verifyToken, err := utility.GenerateOTP(6)
-	userEmail := user.Email
-
-	if err != nil {
-		return nil, http.StatusInternalServerError, err
-	}
-
-	reset := models.PasswordReset{
-		ID:        utility.GenerateUUID(),
-		Email:     strings.ToLower(userEmail),
-		Token:     strconv.Itoa(verifyToken),
-		ExpiresAt: time.Now().Add(time.Duration(config.Config.App.ResetPasswordDuration) * time.Minute),
-	}
-
-	err = reset.CreatePasswordReset(db)
-	if err != nil {
-		return nil, http.StatusInternalServerError, err
-	}
-
-	verifyReq := models.SendOTP{
-		Email:    userEmail,
-		OtpToken: verifyToken,
-	}
-
-	err = actions.AddNotificationToQueue(storage.DB.Redis, names.SendOTP, verifyReq)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
