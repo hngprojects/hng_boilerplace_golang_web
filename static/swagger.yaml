@@ -1,9 +1,8 @@
 openapi: 3.0.3
 info:
-  title: Kimiko Golang Swagger
+  title: Telex_BE Swagger
   description: |-
-    This API provides functionalities for user management, organisation management, authentication, messaging, payments, and various other services.
-    It includes features like social authentication, email notifications, payment integrations with Stripe and Flutterwave, and comprehensive user and organisation management.
+    This API provides functionalities for telex_be
   termsOfService: http://example.com/terms/
   contact:
     email: support@example.com
@@ -13,8 +12,7 @@ info:
   version: 1.0.0
 servers:
   # Added by API Auto Mocking Plugin
-  - url: https://staging.api-golang.boilerplate.hng.tech/api/v1
-  - url: https://deployment.api-golang.boilerplate.hng.tech/api/v1
+  - url: https://api-golang.boilerplate.hng.tech/api/v1
 
 tags:
   - name: auth
@@ -54,8 +52,7 @@ paths:
               required:
                 - email
                 - password
-                - first_name
-                - last_name
+
       responses:
         '201':
           description: User registered successfully
@@ -129,7 +126,14 @@ paths:
                     type: string
                     example: Login Successfully
                   data:
-                    $ref: "#/components/schemas/UserSchema"
+                    type: object
+                    properties:
+                      user:
+                        type: object
+                        $ref: "#/components/schemas/UserSchema"
+                      access_token:
+                        type: string
+                        example: "access_token"
         '401':
           description: Unauthorized
           content:
@@ -869,6 +873,9 @@ components:
         first_name:
           type: string
           description: firstname of the user
+        fullname:
+          type: string
+          description: fullname of the user      
         last_name:
           type: string
           description: lastname of the user
