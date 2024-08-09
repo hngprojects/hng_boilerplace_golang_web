@@ -18,13 +18,13 @@ func TestResetPassword(t *testing.T) {
 	router, authController := SetupAuthTestRouter()
 	db := authController.Db.Postgresql
 	currUUID := utility.GenerateUUID()
-	password, _ := utility.HashPassword("password")
+	someData, _ := utility.HashPassword(currUUID)
 
 	adminData := models.User{
 		ID:       utility.GenerateUUID(),
 		Name:     "admin jane doe2",
 		Email:    fmt.Sprintf("testadmin%v@qa.team", currUUID),
-		Password: password,
+		Password: someData,
 	}
 	db.Create(&adminData)
 	t.Run("Successful reset Password Request", func(t *testing.T) {
@@ -80,13 +80,13 @@ func TestVerifyResetPassword(t *testing.T) {
 	router, authController := SetupAuthTestRouter()
 	db := authController.Db.Postgresql
 	currUUID := utility.GenerateUUID()
-	password, _ := utility.HashPassword("password")
+	someData, _ := utility.HashPassword(currUUID)
 
 	adminData := models.User{
 		ID:       utility.GenerateUUID(),
 		Name:     "admin jane doe2",
 		Email:    fmt.Sprintf("testadmin%v@qa.team", currUUID),
-		Password: password,
+		Password: someData,
 	}
 	db.Create(&adminData)
 
