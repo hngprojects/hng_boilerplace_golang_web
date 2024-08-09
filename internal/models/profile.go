@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/hngprojects/hng_boilerplate_golang_web/pkg/repository/storage/postgresql"
+	"github.com/hngprojects/telex_be/pkg/repository/storage/postgresql"
 	"gorm.io/gorm"
 )
 
@@ -24,7 +24,7 @@ func (p *Profile) GetUserProfile(db *gorm.DB, userID string) (Profile, error) {
 
 	_, err := postgresql.SelectOneFromDb(db, &profile, "user_id = ?", userID)
 	if err != nil {
-		return  profile, err
+		return profile, err
 	}
 	return profile, nil
 }

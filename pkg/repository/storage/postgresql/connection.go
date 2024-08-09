@@ -8,9 +8,9 @@ import (
 
 	"log"
 
-	"github.com/hngprojects/hng_boilerplate_golang_web/internal/config"
-	"github.com/hngprojects/hng_boilerplate_golang_web/pkg/repository/storage"
-	"github.com/hngprojects/hng_boilerplate_golang_web/utility"
+	"github.com/hngprojects/telex_be/internal/config"
+	"github.com/hngprojects/telex_be/pkg/repository/storage"
+	"github.com/hngprojects/telex_be/utility"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	lg "gorm.io/gorm/logger"

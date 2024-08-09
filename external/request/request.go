@@ -3,10 +3,10 @@ package request
 import (
 	"fmt"
 
-	"github.com/hngprojects/hng_boilerplate_golang_web/external/mocks"
-	"github.com/hngprojects/hng_boilerplate_golang_web/external/thirdparty/ipstack"
-	"github.com/hngprojects/hng_boilerplate_golang_web/internal/config"
-	"github.com/hngprojects/hng_boilerplate_golang_web/utility"
+	"github.com/hngprojects/telex_be/external/mocks"
+	"github.com/hngprojects/telex_be/external/thirdparty/ipstack"
+	"github.com/hngprojects/telex_be/internal/config"
+	"github.com/hngprojects/telex_be/utility"
 )
 
 type ExternalRequest struct {

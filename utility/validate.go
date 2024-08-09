@@ -3,7 +3,9 @@ package utility
 import (
 	"net/mail"
 	"os"
+	"regexp"
 
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/nyaruka/phonenumbers"
 )
 
@@ -36,4 +38,13 @@ func fileExists(filename string) bool {
 		return false
 	}
 	return !info.IsDir()
+}
+
+func CleanStringInput(input string) string {
+	policy := bluemonday.UGCPolicy()
+	cleanedInput := policy.Sanitize(input)
+	re := regexp.MustCompile(`[^\w\s]`)
+	cleanedInput = re.ReplaceAllString(cleanedInput, "")
+
+	return cleanedInput
 }

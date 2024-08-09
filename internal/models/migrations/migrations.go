@@ -1,6 +1,6 @@
 package migrations
 
-import "github.com/hngprojects/hng_boilerplate_golang_web/internal/models"
+import "github.com/hngprojects/telex_be/internal/models"
 
 // _ = db.AutoMigrate(MigrationModels()...)
 func AuthMigrationModels() []interface{} {
@@ -11,6 +11,9 @@ func AuthMigrationModels() []interface{} {
 		models.Profile{},
 		models.UserRoom{},
 		models.Message{},
+		models.MagicLink{},
+		models.PasswordReset{},
+		
 	} // an array of db models, example: User{}
 }
 
