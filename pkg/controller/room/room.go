@@ -10,11 +10,11 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"github.com/hngprojects/hng_boilerplate_golang_web/external/request"
-	"github.com/hngprojects/hng_boilerplate_golang_web/internal/models"
-	"github.com/hngprojects/hng_boilerplate_golang_web/pkg/repository/storage"
-	"github.com/hngprojects/hng_boilerplate_golang_web/services/room"
-	"github.com/hngprojects/hng_boilerplate_golang_web/utility"
+	"github.com/hngprojects/telex_be/external/request"
+	"github.com/hngprojects/telex_be/internal/models"
+	"github.com/hngprojects/telex_be/pkg/repository/storage"
+	"github.com/hngprojects/telex_be/services/room"
+	"github.com/hngprojects/telex_be/utility"
 )
 
 type Controller struct {
@@ -320,15 +320,15 @@ func (base *Controller) UpdateUsername(c *gin.Context) {
 }
 
 func (base *Controller) DeleteRoom(c *gin.Context) {
-	
+
 	RoomId := c.Param("roomId")
-	
+
 	if _, err := uuid.Parse(RoomId); err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "invalid room id format", errors.New("failed to parse room id"), nil)
 		c.JSON(http.StatusBadRequest, rd)
 		return
 	}
-	
+
 	claims, exists := c.Get("userClaims")
 	if !exists {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "unable to get user claims", errors.New("user not authorized"), nil)
@@ -354,7 +354,7 @@ func (base *Controller) DeleteRoom(c *gin.Context) {
 func (base *Controller) GetRoomByName(c *gin.Context) {
 	name := c.Params.ByName("roomName")
 
-	respData, code, err := room.GetRoomByName(base.Db.Postgresql,name)
+	respData, code, err := room.GetRoomByName(base.Db.Postgresql, name)
 	if err != nil {
 		base.Logger.Info("error getting room")
 		rd := utility.BuildErrorResponse(code, "error", err.Error(), err, nil)
@@ -412,7 +412,7 @@ func (base *Controller) UpdateRoom(c *gin.Context) {
 		return
 	}
 
-	result, err := room.UpdateRoom(base.Db.Postgresql, req ,id)
+	result, err := room.UpdateRoom(base.Db.Postgresql, req, id)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			rd := utility.BuildErrorResponse(http.StatusNotFound, "error", "Room not found", err, nil)
@@ -428,7 +428,6 @@ func (base *Controller) UpdateRoom(c *gin.Context) {
 	rd := utility.BuildSuccessResponse(http.StatusOK, "Room updated successfully", result)
 	c.JSON(http.StatusOK, rd)
 }
-
 
 func (base *Controller) CheckUser(c *gin.Context) {
 

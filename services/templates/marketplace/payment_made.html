@@ -1,0 +1,19 @@
+{{define "content"}}
+<div style="color: #636363; font-size: 14px">
+  <p>
+    Hi {{if not (eq .seller.Firstname "")}} {{ .seller.Firstname }} {{else}} {{
+    .seller.EmailAddress }} {{end}},
+  </p>
+  <p>
+    Your client {{if not (eq .buyer.Firstname "")}} {{ .buyer.Firstname }}
+    {{else}} {{ .buyer.EmailAddress }} {{end}} has successfully paid {{
+    .transaction.Currency }}{{ .transaction.TotalAmount }} into the 
+    account. Kindly proceed with the delivery and track its progress
+    <a href="{{ .dashboard}}">here</a>.
+  </p>
+  <p>
+    If you haven't uploaded your Banks Details or Identity document, do well to
+    do so to receive your funds when the transaction is completed.
+  </p>
+</div>
+{{end}}

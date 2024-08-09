@@ -7,11 +7,11 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt"
 
-	"github.com/hngprojects/hng_boilerplate_golang_web/external/request"
-	"github.com/hngprojects/hng_boilerplate_golang_web/internal/models"
-	"github.com/hngprojects/hng_boilerplate_golang_web/pkg/repository/storage"
-	"github.com/hngprojects/hng_boilerplate_golang_web/services/auth"
-	"github.com/hngprojects/hng_boilerplate_golang_web/utility"
+	"github.com/hngprojects/telex_be/external/request"
+	"github.com/hngprojects/telex_be/internal/models"
+	"github.com/hngprojects/telex_be/pkg/repository/storage"
+	"github.com/hngprojects/telex_be/services/auth"
+	"github.com/hngprojects/telex_be/utility"
 )
 
 type Controller struct {
@@ -48,12 +48,49 @@ func (base *Controller) RegisterUser(c *gin.Context) {
 	respData, code, err := auth.CreateUser(reqData, base.Db.Postgresql)
 	if err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
+		base.Logger.Error("error sending token: ", err.Error())
 		c.JSON(http.StatusBadRequest, rd)
 		return
 	}
 
-	base.Logger.Info("user created successfully")
-	rd := utility.BuildSuccessResponse(http.StatusCreated, "user created successfully", respData)
+	base.Logger.Info("verification email sent successfully")
+	rd := utility.BuildSuccessResponse(http.StatusCreated, "verification email sent successfully", respData)
+	c.JSON(code, rd)
+}
+
+func (base *Controller) CreateAdmin(c *gin.Context) {
+	var req models.CreateUserRequestModel
+
+	err := c.ShouldBind(&req)
+	if err != nil {
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "Failed to parse request body", err, nil)
+		c.JSON(http.StatusBadRequest, rd)
+		return
+	}
+
+	err = base.Validator.Struct(&req)
+	if err != nil {
+		rd := utility.BuildErrorResponse(http.StatusUnprocessableEntity, "error", "Validation failed", utility.ValidationResponse(err, base.Validator), nil)
+		c.JSON(http.StatusUnprocessableEntity, rd)
+		return
+	}
+
+	reqData, err := auth.ValidateCreateUserRequest(req, base.Db.Postgresql)
+	if err != nil {
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
+		c.JSON(http.StatusBadRequest, rd)
+		return
+	}
+
+	respData, code, err := auth.CreateAdmin(reqData, base.Db.Postgresql)
+	if err != nil {
+		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", err.Error(), err, nil)
+		c.JSON(http.StatusBadRequest, rd)
+		return
+	}
+
+	base.Logger.Info("verification email sent successfully")
+	rd := utility.BuildSuccessResponse(http.StatusCreated, "verification email sent successfully", respData)
 	c.JSON(code, rd)
 }
 

@@ -10,7 +10,9 @@ type ServerConfiguration struct {
 }
 
 type App struct {
-	Name string
-	Mode string
-	Url  string
+	Name                  string
+	Mode                  string
+	Url                   string
+	MagicLinkDuration     int
+	ResetPasswordDuration int
 }

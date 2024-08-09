@@ -1,0 +1,24 @@
+{{define "content"}}
+<div style="color: #636363; font-size: 14px">
+  <p>
+    Hello {{if not (eq .seller.Firstname "")}} {{ .seller.Firstname }} {{else}}
+    {{ .seller.EmailAddress }} {{end}},
+  </p>
+  <p>
+    Transaction ({{if not (eq .transaction.Title "")}} {{ .transaction.Title }}
+    {{else}} {{ .transaction_id }} {{end}}) has been accepted.. They will be
+    expecting you to deliver as agreed.
+  </p>
+
+  <p>
+    You can view and manage your transaction by visiting your
+    <a href="{{.dashboard}}">dashboard</a>
+
+    <br />
+    If you have any questions, or require any assistance, call our hotline +234
+    802 080 9509 or send an email to support@.com.
+    <br />
+    Thank you for using  😊
+  </p>
+</div>
+{{end}}

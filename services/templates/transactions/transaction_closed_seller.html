@@ -1,0 +1,22 @@
+{{define "content"}}
+<div style="color: #636363; font-size: 14px">
+  <p style="margin-top: 0px">
+    Dear {{if not (eq .seller.Firstname "")}} {{ .seller.Firstname }} {{else}}
+    {{ .seller.EmailAddress }} {{end}},
+  </p>
+
+  <p>
+    The transaction "{{if not (eq .transaction.Title "")}} {{ .transaction.Title
+    }} {{else}} {{ .transaction_id }} {{end}}" window has been closed as the
+    transaction was successfully completed between you and the buyer. You can
+    always initiate a new transaction by signing back into your account
+    <a href="{{.dashboard}}">here</a>.
+  </p>
+  <p>
+    If you need further help, check our
+    <a href="{{.faq}}">FAQ page </a> or send an email to
+    <a href="mailto:support@.com">support@.com</a>.
+  </p>
+  <p>Thanks for choosing </p>
+</div>
+{{end}}

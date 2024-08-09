@@ -8,8 +8,8 @@ import (
 	"github.com/golang-jwt/jwt"
 	"gorm.io/gorm"
 
-	"github.com/hngprojects/hng_boilerplate_golang_web/internal/config"
-	"github.com/hngprojects/hng_boilerplate_golang_web/internal/models"
+	"github.com/hngprojects/telex_be/internal/config"
+	"github.com/hngprojects/telex_be/internal/models"
 )
 
 func GetConnToken(userId string, db *gorm.DB) (gin.H, int, error) {

@@ -3,8 +3,8 @@ package ipstack
 import (
 	"fmt"
 
-	"github.com/hngprojects/hng_boilerplate_golang_web/external/external_models"
-	"github.com/hngprojects/hng_boilerplate_golang_web/internal/config"
+	"github.com/hngprojects/telex_be/external/external_models"
+	"github.com/hngprojects/telex_be/internal/config"
 )
 
 func (r *RequestObj) IpstackResolveIp() (external_models.IPStackResolveIPResponse, error) {

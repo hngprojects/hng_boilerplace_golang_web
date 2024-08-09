@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/elliotchance/phpserialize"
-	"github.com/hngprojects/hng_boilerplate_golang_web/utility"
+	"github.com/hngprojects/telex_be/utility"
 )
 
 type SendRequestObject struct {

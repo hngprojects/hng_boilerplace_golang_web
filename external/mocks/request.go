@@ -3,8 +3,8 @@ package mocks
 import (
 	"fmt"
 
-	"github.com/hngprojects/hng_boilerplate_golang_web/external/mocks/ipstack_mocks"
-	"github.com/hngprojects/hng_boilerplate_golang_web/utility"
+	"github.com/hngprojects/telex_be/external/mocks/ipstack_mocks"
+	"github.com/hngprojects/telex_be/utility"
 )
 
 type ExternalRequest struct {
