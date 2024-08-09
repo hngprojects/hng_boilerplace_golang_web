@@ -13,7 +13,6 @@ func AuthMigrationModels() []interface{} {
 		models.Message{},
 		models.MagicLink{},
 		models.PasswordReset{},
-		
 	} // an array of db models, example: User{}
 }
 
