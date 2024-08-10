@@ -147,6 +147,7 @@ func LoginUser(req models.LoginRequestModel, db *gorm.DB) (gin.H, int, error) {
 			"last_name":   userData.Profile.LastName,
 			"fullname":    userData.Profile.FirstName + " " + userData.Profile.LastName,
 			"phone":       userData.Profile.Phone,
+			"avatar_url":  userData.Profile.AvatarURL,
 			"expires_in":  strconv.Itoa(int(tokenData.ExpiresAt.Unix())),
 			"created_at":  strconv.Itoa(int(userData.CreatedAt.Unix())),
 			"updated_at":  strconv.Itoa(int(userData.UpdatedAt.Unix())),

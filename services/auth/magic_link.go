@@ -55,7 +55,7 @@ func MagicLinkRequest(userEmail, url string, db *gorm.DB) (string, int, error) {
 		ID:        utility.GenerateUUID(),
 		Email:     strings.ToLower(userEmail),
 		Token:     strconv.Itoa(resetToken),
-		ExpiresAt: time.Now().Add(time.Duration(config.App.MagicLinkDuration) * time.Minute),
+		ExpiresAt: time.Now().Add(time.Duration(config.App.ResetPasswordDuration) * time.Minute),
 	}
 
 	err = magic.CreateMagicLink(db)
@@ -63,7 +63,7 @@ func MagicLinkRequest(userEmail, url string, db *gorm.DB) (string, int, error) {
 		return "error", http.StatusInternalServerError, err
 	}
 
-	magic_link := fmt.Sprintf("%v/login/magic-link?token=%v", url, resetToken)
+	magic_link := fmt.Sprintf("%vauth/login/magic-link?token=%v", url, resetToken)
 
 	resetReq := models.SendMagicLink{
 		Email:     userEmail,
@@ -133,6 +133,7 @@ func VerifyMagicLinkToken(req models.VerifyMagicLinkRequest, db *gorm.DB) (gin.H
 			"last_name":  userData.Profile.LastName,
 			"fullname":   userData.Profile.FirstName + " " + userData.Profile.LastName,
 			"phone":      userData.Profile.Phone,
+			"avatar_url": userData.Profile.AvatarURL,
 			"expires_in": strconv.Itoa(int(tokenData.ExpiresAt.Unix())),
 			"created_at": strconv.Itoa(int(userData.CreatedAt.Unix())),
 			"updated_at": strconv.Itoa(int(userData.UpdatedAt.Unix())),
