@@ -1,0 +1,23 @@
+{{define "content"}}
+<div style="color: #636363; font-size: 16px">
+  <p>Hello, {{ .firstname }},</p>
+
+  <p>
+    Transaction ({{if not (eq .transaction.Title "")}} {{ .transaction.Title }}
+    {{else}} {{ .transaction_id }} {{end}}) has been Rejected, kindly visit your
+    <a href="{{.dashboard}}">dashboard</a> for more info
+  </p>
+
+  <p>
+    Kindly reach out to the other parties to ascertain the cause of the failed
+    transaction.
+  </p>
+
+  <p>
+    If you have any questions, or require any assistance, call our hotline +234
+    802 080 9509 or send an email to support@.com.
+  </p>
+
+  <p>Thank you for using  😊</p>
+</div>
+{{end}}

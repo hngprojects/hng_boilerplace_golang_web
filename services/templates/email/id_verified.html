@@ -1,0 +1,22 @@
+{{define "content"}}
+<div style="padding: 20px 0px; border-top: 1px solid rgba(0, 0, 0, 0.05)">
+  <h1 style="margin-top: 0px">Dear {{ .firstname }}</h1>
+  <div style="color: #636363; font-size: 14px">
+    <p>
+      This is to inform you that the supplied {{ .type }} has been successfully
+      verified on our platform and your account has been moved to tier two.
+    </p>
+
+    <p>
+      This means that all  fund disbursements to your account would happen
+      seamless without any hindrance.
+    </p>
+
+    <p>Thank you for choosing .</p>
+
+    If you have any questions, be sure to check our FAQ page
+    <a href="{{.faq}}" target="_blank">here</a> or send an email to
+    support@.com
+  </div>
+</div>
+{{end}}

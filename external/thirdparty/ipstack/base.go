@@ -1,8 +1,8 @@
 package ipstack
 
 import (
-	"github.com/hngprojects/hng_boilerplate_golang_web/external"
-	"github.com/hngprojects/hng_boilerplate_golang_web/utility"
+	"github.com/hngprojects/telex_be/external"
+	"github.com/hngprojects/telex_be/utility"
 )
 
 type RequestObj struct {

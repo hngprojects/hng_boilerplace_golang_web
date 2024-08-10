@@ -8,8 +8,8 @@ import (
 	"github.com/golang-jwt/jwt"
 	"gorm.io/gorm"
 
-	"github.com/hngprojects/hng_boilerplate_golang_web/internal/models"
-	"github.com/hngprojects/hng_boilerplate_golang_web/utility"
+	"github.com/hngprojects/telex_be/internal/models"
+	"github.com/hngprojects/telex_be/utility"
 )
 
 func Authorize(db *gorm.DB) gin.HandlerFunc {

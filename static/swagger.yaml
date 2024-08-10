@@ -1,0 +1,1637 @@
+openapi: 3.0.3
+info:
+  title: Telex_BE Swagger
+  description: |-
+    This API provides functionalities for telex_be
+  termsOfService: http://example.com/terms/
+  contact:
+    email: support@example.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - url: https://api-golang.boilerplate.hng.tech/api/v1
+
+tags:
+  - name: auth
+    description:  API for user registration and authentication
+  - name: rooms
+    description: API for rooms endpoint
+
+
+paths:
+
+  # Auth paths
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                  format: password
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                phone_number:
+                  type: string
+              required:
+                - email
+                - password
+
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: success response
+                    example: success
+                  message:
+                    type: string
+                    example: "user created successfully"
+                  status_code:
+                    type: integer
+                    example: 201
+
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorSchema"
+                
+        '422':
+          description: Unprocessed Entity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnprocessedEntityErrorSchema"
+  
+     
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Authenticate a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: User login successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: success response
+                    example: success
+                  status_code:
+                    type: integer
+                    description: HTTP status Code response
+                    example: 200
+                  message:
+                    type: string
+                    example: Login Successfully
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        type: object
+                        $ref: "#/components/schemas/UserSchema"
+                      access_token:
+                        type: string
+                        example: "access_token"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedErrorSchema"
+        '422':
+          description: Unprocessed Entity
+          content:
+           application/json:
+            schema:
+                $ref: "#/components/schemas/UnprocessedEntityErrorSchema"
+                
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: logout a user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User logout successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: success response
+                    example: success
+                  status_code:
+                    type: integer
+                    description: HTTP status Code response
+                    example: 200
+                  message:
+                    type: string
+                    example: Logout Successfully
+                  data:
+                    type: object
+                    example: {}
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedErrorSchema"
+        '400':
+          description: Invalid input
+          content:
+           application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "Bad Request"
+                message:
+                  type: string
+                  example: "message"
+                status_code:
+                  type: integer
+                  example: 400
+  /auth/google:
+    post:
+      tags:
+        - auth
+      summary: Endpoint for callback from frontend with token gotten from google oauth provider
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id_token:
+                  type: string
+              required:
+                - id_token
+
+      responses:
+        '200':
+          description: user sign in succesfully
+          content:
+           application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "success"
+                message:
+                  type: string
+                  example: "user sign in  successfully"
+                status_code:
+                  type: integer
+                  example: 200
+                data:
+                  type: object
+                  properties:
+                      access_token:
+                        type: string
+                        example: "access_token"
+                      user:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            example: "userId_here"
+                          email:
+                            type: string
+                            example: "user@example.com"
+                          fullname:
+                            type: string
+                            example: "John Doe"
+                          is_verified:
+                            type: boolean
+                            example: true
+                          username:
+                            type: string
+                            example: "John Doe"
+                          avatar_url:
+                            type: string
+                            example: "http://example.com/avatar.jpg"
+                          expires_in:
+                            type: string
+                            format: date-time
+                            example: "1748982383"
+                          created_at:
+                            type: string
+                            format: date-time
+                            example: "1748982383"
+                          updated_at:
+                            type: string
+                            format: date-time
+                            example: "1748982383"
+                    
+        '400':
+          description: Invalid input
+          content:
+           application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "Bad Request"
+                message:
+                  type: string
+                  example: "message"
+                status_code:
+                  type: integer
+                  example: 400
+        '422':
+          description: Unprocessed Entity
+          content:
+           application/json:
+            schema:
+                $ref: "#/components/schemas/UnprocessedEntityErrorSchema"
+
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedErrorSchema"
+
+  /auth/change-password:
+    put:
+      tags:
+        - auth
+      summary: Verify the password reset token and set a new password
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                old_password:
+                  type: string
+                new_password:
+                  type: string
+              required:
+                - old_password
+                - new_password
+
+      responses:
+        '200':
+          description: Password updated successfully
+          content:
+           application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "success"
+                message:
+                  type: string
+                  example: "Password updated successfully"
+                status_code:
+                  type: integer
+                  example: 200
+        '400':
+          description: Invalid input
+          content:
+           application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "Bad Request"
+                message:
+                  type: string
+                  example: "message"
+                status_code:
+                  type: integer
+                  example: 400
+        '422':
+          description: Unprocessed Entity
+          content:
+           application/json:
+            schema:
+                $ref: "#/components/schemas/UnprocessedEntityErrorSchema"
+
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedErrorSchema"
+
+  /auth/magick-link:
+    post:
+      tags:
+        - auth
+      summary: Request a magic link for authentication
+      description: |-
+            Uses Cases: 
+              - Sign up a new user
+              - Sign in an existing user
+              - Sign in with auto sign-up a new user if not exists
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+              required:
+                - email
+      responses:
+        '200':
+          description: Magic link sent successfully
+          content:
+           application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "success"
+                message:
+                  type: string
+                  example: "Magic link sent succesfully"
+                statusCode:
+                  type: integer
+                  example: 200
+                  
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestErrorSchema'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnprocessedEntityErrorSchema'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorSchema'
+                  
+  /auth/magick-link/verify:
+    post:
+      tags:
+        - auth
+      summary: Verify the magic link token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+              required:
+                - token
+      responses:
+        '200':
+          description: Token verified successfully
+          content:
+           application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "success"
+                statusCode:
+                  type: integer
+                  example: 200
+                message:
+                  type: string
+                  example: "Token verified successfully"
+                data:
+                  $ref: "#/components/schemas/UserSchema"
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestErrorSchema'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnprocessedEntityErrorSchema'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorSchema'
+                  
+
+  /auth/password-reset:
+    post:
+      tags:
+        - auth
+      summary: Request a password reset link
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+              required:
+                - email
+      responses:
+        '200':
+          description: Password reset link sent successfully
+          content:
+           application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "success"
+                message:
+                  type: string
+                  example: "Password reset link sent successfully"
+                statusCode:
+                  type: integer
+                  example: 200
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestErrorSchema'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnprocessedEntityErrorSchema'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorSchema'
+                  
+  
+  /auth/password-reset/verify:
+    post:
+      tags:
+        - auth
+      summary: Verify the password reset token and set a new password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                new_password:
+                  type: string
+              required:
+                - token
+                - new_password
+
+      responses:
+        '200':
+          description: Password reset successfully
+          content:
+           application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "success"
+                message:
+                  type: string
+                  example: "Password reset successfully"
+                statusCode:
+                  type: integer
+                  example: 200
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestErrorSchema'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnprocessedEntityErrorSchema'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorSchema'
+
+  /auth/email-request:
+    post:
+      tags:
+        - auth
+      summary: Request an email verification token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+              required:
+                - email
+      responses:
+        '200':
+          description: "Verification token sent to email"
+          content:
+           application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "success"
+                message:
+                  type: string
+                  example: "Verification token sent to email"
+                statusCode:
+                  type: integer
+                  example: 200
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestErrorSchema'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnprocessedEntityErrorSchema'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorSchema'
+                  
+  
+  /auth/email-request/verify:
+    post:
+      tags:
+        - auth
+      summary: Verify the token 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+              required:
+                - token
+
+      responses:
+        '200':
+          description: email verified successfully
+          content:
+           application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "success"
+                message:
+                  type: string
+                  example: "Email verified successfully"
+                statusCode:
+                  type: integer
+                  example: 200
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestErrorSchema'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnprocessedEntityErrorSchema'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerErrorSchema'
+ 
+
+components:
+
+  schemas:
+
+    NotFoundErrorSchema:
+      type: object
+      properties:
+        status:
+          type: string
+          description: |-
+            The responses will contain this property with
+            - Not found error
+          example: Not Found
+        status_code:
+          type: integer
+          description: >
+            The HTTP status code. when data cant be found
+          example: 404
+        message:
+          type: string
+          description: >
+            A basic message pointing to data doesn't exist.
+
+    SuccessResponseSchema:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        status_code:
+          type: integer
+          description: >
+            The HTTP status code. Usually 200 , 201, 204 etc
+          example: 200
+        message:
+          type: string
+          description: >
+            A basic message describing a request was processed successfully.
+            example: "Successfully"
+
+    SuccessResponseSchema2:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        status_code:
+          type: integer
+          description: >
+            The HTTP status code. Usually 200 , 201, 204 etc
+          example: 201
+        message:
+          type: string
+          description: >
+            A basic message describing a request was processed successfully.
+            example: "Successfully"
+
+    ServerErrorSchema:
+      type: object
+      properties:
+        status:
+          type: string
+          description: |-
+            The responses will contain this property with
+            - Internal server error
+          example: Internal Server Error
+        status_code:
+          type: integer
+          description: >
+            The HTTP status code. Usually missing if `error` is present.
+          example: 500
+        message:
+          type: string
+          description: >
+            A basic message describing the problem from the server.
+
+    BadRequestErrorSchema:
+      type: object
+      properties:
+        status:
+          type: string
+          description: |-
+            Certain responses will contain this property with the provided values.
+
+            Usually one of these:
+            - Bad Request
+            - invalid input
+          example: Bad Reqeust
+        statuCode:
+          type: integer
+          description: >
+            The HTTP status code. Usually missing if `error` is present.
+          example: 400
+        message:
+          type: string
+          description: >
+            A basic message describing the problem with the request. Usually missing if `error` is present.
+    
+    UnprocessedEntityErrorSchema:
+      type: object
+      properties:
+        errors:
+          type: array
+          description: >
+            contains field and corresponding error message
+          items:
+            $ref: "#/components/schemas/UnprocessedEntity"
+        statuCode:
+          type: integer
+          description: >
+            The HTTP status code. Usually missing if `error` is present.
+          example: 422
+        status:
+          type: string
+          example: "error"
+        message:
+          type: string
+          example: "Validation failed"
+        
+    UnauthorizedErrorSchema:
+      type: object
+      properties:
+        status:
+          type: string
+          description: |-
+            Certain responses will contain this property with the provided values.
+
+            Usually one of these:
+            - Unauthorized
+            - Forbidden
+          example: Unauthorized
+        statuCode:
+          type: integer
+          description: >
+            The HTTP status code. Usually missing if `error` is present.
+          example: 401
+        message:
+          type: string
+          description: >
+            A basic message describing the problem with the request. Usually missing if `error` is present.
+
+    ForbiddenErrorSchema:
+      type: object
+      properties:
+        status:
+          type: string
+          description: |-
+            Certain responses will contain this property with the provided values.
+
+            Usually one of these:
+            - Forbidden
+            - Unauthorized
+          example: Forbidden
+        statuCode:
+          type: integer
+          description: >
+            The HTTP status code. Usually missing if `error` is present.
+          example: 403
+        message:
+          type: string
+          description: >
+            A basic message describing the problem with the request. Usually missing if `error` is present.
+
+    UserSchema:
+      type: object
+      description: Object describing the user related to the issued access and refresh tokens.
+      properties:
+        id:
+          type: string
+          description: id of the user
+        first_name:
+          type: string
+          description: firstname of the user
+        fullname:
+          type: string
+          description: fullname of the user      
+        last_name:
+          type: string
+          description: lastname of the user
+        is_verified:
+          type: boolean
+          example: true
+        email:
+          type: string
+          description: User's primary contact email.
+        phone:
+          type: string
+          format: phone
+          description: User's primary contact phone number.
+        username:
+          type: string
+          description: Last updated time        
+        created_at:
+          type: string
+          format: date-time
+          description: Time of registration
+        updated_at:
+          type: string
+          format: date-time
+          description: Last updated time
+        expires_at:
+          type: string
+          format: date-time
+          description: UNIX timestamp after which the `access_token` should be renewed by using the refresh token with the `refresh_token` grant type.
+
+    OrganisationResponseSchema:
+      type: object
+      description: Object describing the organisation data
+      properties:
+        organisation_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: organisation name
+        description: 
+          type: string
+          description: organisation description
+
+    UpdateUser:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          format: phone
+        language:
+          type: string
+
+    Organisation:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Example organisation"
+        description:
+          type: string
+          example: "An example organisation"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UnprocessedEntity:
+      type: object
+      properties:
+        field:
+          type: string
+          description: Message
+
+    FAQSchema:
+      type: object
+      properties:
+        question:
+          type: string
+        answer:
+          type: string
+        category:
+          type: string
+
+    NewsletterSchema:
+      type: object
+      properties:
+        email:
+          type: string
+
+    LanguageSchema:
+      type: object
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+
+    TimezoneSchema:
+      type: object
+      properties:
+        timezone:
+          type: string
+        gmt_offset:
+          type: string
+        description:
+          type: string
+        
+
+    RegionSchema:
+      type: object
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+
+    WaitlistSchema:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+
+    UserRegionUpdateSchema:
+      type: object
+      properties:
+        region_id:
+          type: string
+          format: uuid
+        timezone_id:
+          type: string
+          format: uuid
+        language_id:
+          type: string
+          format: uuid
+
+    UserRegionUpdateResponseSchema:
+      type: object
+      properties:
+        status:
+          type: string
+        status_code:
+          type: integer
+        message:
+          type: string
+    
+    UserRegionResponseSchema:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        status_code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: User region retrieved successfully
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: 019109d8-a5a6-7f4d-a3ec-ee3bd0383ee5
+            userId:
+              type: string
+              format: uuid
+              example: 019109d8-a5a6-7f47-8cc5-d9b3f62293f8
+            region_id:
+              type: string
+              format: uuid
+              example: 019109d8-a5a6-7f4e-84a2-9e9f0eed380b
+            timezone_id:
+              type: string
+              format: uuid
+              example: 019109d8-a5a6-7f50-a8b4-47512d0150c9
+            language_id:
+              type: string
+              format: uuid
+              example: 019109d8-a5a6-7f4f-8824-0daa5e00a9bd
+            created_at:
+              type: string
+              format: date-time
+              example: 2024-07-31T18:31:18.832037+01:00
+            updated_at:
+              type: string
+              format: date-time
+              example: 2024-07-31T18:31:18.832037+01:00
+
+    OrgRoleCreateSchema:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+          description: Name of the role.
+        description:
+          type: string
+          description: Description of the role.
+
+    OrgRoleCreateResponseSchema:
+      type: object
+      properties:
+        status:
+          type: string
+        status_code:
+          type: integer
+        message:
+          type: string
+
+    OrgRolesListResponseSchema:
+      type: object
+      properties:
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrgRoleResponseSchema'
+
+    OrgRoleResponseSchema:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        organization_id:
+          type: string
+          format: uuid
+
+    OrgRoleUpdateSchema:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+          description: Updated name of the role.
+        description:
+          type: string
+          description: Updated description of the role.
+
+    OrgRoleUpdateResponseSchema:
+      type: object
+      properties:
+        status:
+          type: string
+        status_code:
+          type: integer
+        message:
+          type: string
+
+    OrgRoleDeleteResponseSchema:
+      type: object
+      properties:
+        status:
+          type: string
+        status_code:
+          type: integer
+        message:
+          type: string
+
+    RolePermissionsUpdateSchema:
+      type: object
+      required:
+        - category
+        - permission_list
+      properties:
+        category:
+          type: string
+          description: Category of permissions being updated.
+        permission_list:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: Object where keys are permission names and values are boolean indicating whether the permission is granted.
+
+    RolePermissionsUpdateResponseSchema:
+      type: object
+      properties:
+        status:
+          type: string
+        status_code:
+          type: integer
+        message:
+          type: string
+    
+    CreateJobPost:
+      type: object
+      properties:
+        title:
+          type: string
+        salary_range:
+          type: string
+        job_type:
+          type: string
+        location:
+          type: string
+        deadline:
+          type: string
+        job_mode:
+          type: string
+        experience_level:
+          type: string
+        benefits:
+          type: string
+        company_name:
+          type: string
+        description:
+          type: string
+        key_responsibilities:
+          type: string
+        qualifications:
+          type: string
+
+    UpdateJobPost:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Updated Software Engineer Intern
+        salary_range:
+          type: string
+          example: 6000-8000 USD
+        job_type:
+          type: string
+          example: full-time
+        location:
+          type: string
+          example: San Francisco, CA
+        deadline:
+          type: string
+          format: date-time
+          example: 2024-12-31T23:59:59Z
+        job_mode:
+          type: string
+          example: hybrid
+        experience_level:
+          type: string
+          example: Entry level (0-3 years)
+        benefits:
+          type: string
+          example: Flexible hours, Health insurance, Stock options
+        company_name:
+          type: string
+          example: Tech Innovators Inc.
+        description:
+          type: string
+          example: We are looking for a passionate Software Engineer Intern to join our team. You'll work on exciting projects and gain valuable experience.
+        key_responsibilities:
+          type: string
+          example: Develop and maintain web applications, Collaborate with the team on various projects, Participate in code reviews
+        qualifications:
+          type: string
+          example: Ability to work in a team, Bachelor degree in Computer Science
+
+    JobPost:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 01910544-d1e1-7ada-bdac-c761e527ec91
+        title:
+          type: string
+          example: Junior Backend intern
+        salary_range:
+          type: string
+          example: 500,000 NGN
+        job_type:
+          type: string
+          example: internship
+        location:
+          type: string
+          example: San Francisco, CA
+        deadline:
+          type: string
+          format: date-time
+          example: 2024-12-31T23:59:59Z
+        job_mode:
+          type: string
+          example: remote
+        experience_level:
+          type: string
+          example:  0-2 years
+        how_to_apply:
+          type: string
+          example: Submit your resume and cover letter to hr@company.com
+        benefits:
+          type: string
+          example: Flexible hours, Remote work, Health insurance
+        company_name:
+          type: string
+          example: Tech Innovators
+        description:
+          type: string
+          example: We are looking for a passionate Software Engineer Intern to join our team. You will be working on exciting projects and gain hands-on experience.
+        key_responsibilities:
+          type: string
+          example: Develop and maintain web applications, Collaborate with the team on various projects, Participate in code reviews
+        qualifications:
+          type: string
+          example: Expert with GIT
+        created_at:
+          type: string
+          format: date-time
+          example: 2024-07-30T21:11:21.9538358+01:00
+        updated_at:
+          type: string
+          format: date-time
+          example: 2024-07-30T21:11:21.9538358+01:00
+
+    JobPostResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        status_code:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: Job created successfully
+        data:
+          $ref: '#/components/schemas/JobPost'
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        status_code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: An error occurred
+          
+          
+    addUserToOrganizationReq:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+          example: 01910544-d1e1-7ada-bdac-c761e527ec91
+          
+          
+    createOrganizationReq:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        email:
+          type: string
+        state:
+          type: string
+        industry:
+          type: string
+        type:
+          type: string
+        address:
+          type: string
+        country:
+          type: string
+          
+    organizationResData:
+      type: object
+      description: Object describing the organisation data
+      properties:
+        organisation_id:
+          type: string
+          format: uuid
+          example: 01910544-d1e1-7ada-bdac-c761e527ec91
+        name:
+          type: string
+          example: daveOrg
+        description: 
+          type: string
+          example: something something
+        email:
+          type: string
+          example: org@gmail.com
+        state: 
+          type: string
+          example: lagos
+        industry:
+          type: string
+          example: tech
+        type: 
+          type: string
+          example: sometype
+        address: 
+          type: string
+          example: somewhere somewhere
+        created_at:
+          type: string
+          format: date-time
+          example: 2024-07-30T21:11:21.9538358+01:00
+        updated_at:
+          type: string
+          format: date-time
+          example: 2024-07-30T21:11:21.9538358+01:00
+          
+    organizationSuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        status_code:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: organization created successfully
+        data:
+          $ref: '#/components/schemas/organizationResData'
+    
+    organizationUSuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        status_code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: organization updated successfully
+        data:
+          $ref: '#/components/schemas/organizationResData'
+          
+    organizationGSuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        status_code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: organization retrieved successfully
+        data:
+          $ref: '#/components/schemas/organizationResData'
+          
+    CreateHelpCenter:
+      type: object
+      properties:
+        title:
+          type: string
+          example: How to reset password
+        content:
+          type: string
+          example: To reset your password, go to the settings page and click 'Reset Password'.
+      required:
+        - title
+        - content
+
+    HelpCenter:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 0190fade-6a88-783f-97bc-870d0f5c187e
+        title:
+          type: string
+          example: How to reset password
+        content:
+          type: string
+          example: To reset your password, go to the settings page and click 'Reset Password'.
+        author:
+          type: string
+          example: John Doe
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    
+    ContactSchema:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        subject:
+          type: string
+        message:
+          type: string
+      required:
+        - id
+        - name
+        - email
+        - subject
+        - message
+
+    UserDataPrivacyResponseSchema:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        status_code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: User data privacy settings retrieved successfully
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: 01913139-0969-7ed5-a830-2f20f6b2c4e7
+            user_id:
+              type: string
+              format: uuid
+              example: 0191289e-fba3-7674-85bb-0c4a63ed8ebf
+            profile_visibility:
+              type: boolean
+              example: false
+            share_data_with_partners:
+              type: boolean
+              example: false
+            receive_email_updates:
+              type: boolean
+              example: false
+            enable_2fa:
+              type: boolean
+              example: false
+            use_data_encryption:
+              type: boolean
+              example: false
+            allow_analytics:
+              type: boolean
+              example: false
+            personalized_ads:
+              type: boolean
+              example: false
+            created_at:
+              type: string
+              format: date-time
+              example: 2024-08-08T10:01:47.242+01:00
+            updated_at:
+              type: string
+              format: date-time
+              example: 2024-08-08T10:01:47.242+01:00
+
+    UserDataPrivacyUpdateSchema:
+      type: object
+      properties:
+        profile_visibility:
+          type: boolean
+          example: false
+        share_data_with_partners:
+          type: boolean
+          example: false
+        receive_email_updates:
+          type: boolean
+          example: false
+        enable_2fa:
+          type: boolean
+          example: true
+        use_data_encryption:
+          type: boolean
+          example: false
+        allow_analytics:
+          type: boolean
+          example: true
+        personalized_ads:
+          type: boolean
+          example: true
+
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: error
+              message:
+                type: string
+                example: Unauthorized
+
+    NotFoundError:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: error
+              message:
+                type: string
+                example: Not Found      
+
+  parameters:
+    PageLimitParam:
+      name: page
+      in: query
+      description: Page number for pagination
+      required: false
+      schema:
+        type: integer
+        default: 1
+    LimitParam:
+      name: limit
+      in: query
+      description: Number of items per page
+      required: false
+      schema:
+        type: integer
+        default: 10
+
+  securitySchemes:
+      bearerAuth:
+        type: http
+        scheme: bearer
+        bearerFormat: JWT

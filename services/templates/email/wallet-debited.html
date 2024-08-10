@@ -1,0 +1,18 @@
+{{define "content"}}
+<div style="color: #636363; font-size: 14px">
+  <p>Hi {{ .firstname }},</p>
+  <p>
+    Your  wallet has been Debited. Below is a summary of your
+    transaction for your review:
+  </p>
+  <p>Debited Amount: {{ .currency }} {{ .amount }}</p>
+  <p>Timestamp: {{ .transaction.UpdatedAt }}</p>
+  <p>
+    Do contact us if you have any questions or issues with this transaction.
+    Thank you,
+  </p>
+  <br />
+  <p>Best,</p>
+  <p>The  Team</p>
+</div>
+{{end}}

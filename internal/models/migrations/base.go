@@ -3,7 +3,7 @@ package migrations
 import (
 	"fmt"
 
-	"github.com/hngprojects/hng_boilerplate_golang_web/pkg/repository/storage"
+	"github.com/hngprojects/telex_be/pkg/repository/storage"
 	"gorm.io/gorm"
 )
 

@@ -6,11 +6,13 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"github.com/hngprojects/hng_boilerplate_golang_web/internal/config"
-	"github.com/hngprojects/hng_boilerplate_golang_web/pkg/middleware"
-	"github.com/hngprojects/hng_boilerplate_golang_web/pkg/repository/storage"
-	"github.com/hngprojects/hng_boilerplate_golang_web/utility"
+	"github.com/hngprojects/telex_be/internal/config"
+	"github.com/hngprojects/telex_be/pkg/middleware"
+	"github.com/hngprojects/telex_be/pkg/repository/storage"
+	"github.com/hngprojects/telex_be/utility"
 )
 
 func Setup(logger *utility.Logger, validator *validator.Validate, db *storage.Database, appConfiguration *config.App) *gin.Engine {
@@ -52,6 +54,13 @@ func Setup(logger *utility.Logger, validator *validator.Validate, db *storage.Da
 			"code":    404,
 			"status":  http.StatusNotFound,
 		})
+	})
+
+	r.StaticFile("/swagger.yaml", "static/swagger.yaml")
+	url := ginSwagger.URL("/swagger.yaml")
+	r.GET("/api/docs/*any", func(c *gin.Context) {
+		c.Writer.Header().Set("Content-Security-Policy", "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-2TOI2ugkuROHHfKZr6kdGv+XxhrVUI8uHycXqXUIR4g='; img-src 'self' data:;")
+		ginSwagger.WrapHandler(swaggerFiles.Handler, url)(c)
 	})
 
 	return r

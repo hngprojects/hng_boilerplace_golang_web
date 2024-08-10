@@ -11,15 +11,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/hngprojects/hng_boilerplate_golang_web/internal/config"
-	"github.com/hngprojects/hng_boilerplate_golang_web/internal/models"
-	"github.com/hngprojects/hng_boilerplate_golang_web/internal/models/migrations"
-	"github.com/hngprojects/hng_boilerplate_golang_web/pkg/controller/auth"
-	"github.com/hngprojects/hng_boilerplate_golang_web/pkg/controller/room"
-	"github.com/hngprojects/hng_boilerplate_golang_web/pkg/middleware"
-	"github.com/hngprojects/hng_boilerplate_golang_web/pkg/repository/storage"
-	"github.com/hngprojects/hng_boilerplate_golang_web/pkg/repository/storage/postgresql"
-	"github.com/hngprojects/hng_boilerplate_golang_web/utility"
+	"github.com/hngprojects/telex_be/internal/config"
+	"github.com/hngprojects/telex_be/internal/models"
+	"github.com/hngprojects/telex_be/internal/models/migrations"
+	"github.com/hngprojects/telex_be/pkg/controller/auth"
+	"github.com/hngprojects/telex_be/pkg/controller/room"
+	"github.com/hngprojects/telex_be/pkg/middleware"
+	"github.com/hngprojects/telex_be/pkg/repository/storage"
+	"github.com/hngprojects/telex_be/pkg/repository/storage/postgresql"
+	"github.com/hngprojects/telex_be/pkg/repository/storage/redis"
+	"github.com/hngprojects/telex_be/utility"
 )
 
 func Setup() *utility.Logger {
@@ -27,6 +28,7 @@ func Setup() *utility.Logger {
 	config := config.Setup(logger, "../../app")
 
 	postgresql.ConnectToDatabase(logger, config.TestDatabase)
+	redis.ConnectToRedis(logger, config.Redis)
 	db := storage.Connection()
 	if config.TestDatabase.Migrate {
 		migrations.RunAllMigrations(db)
@@ -54,6 +56,22 @@ func AssertResponseMessage(t *testing.T, got, expected string) {
 func AssertBool(t *testing.T, got, expected bool) {
 	if got != expected {
 		t.Errorf("handler returned wrong boolean: got %v expected %v", got, expected)
+	}
+}
+
+func AssertValidationError(t *testing.T, response map[string]interface{}, field string, expectedMessage string) {
+	errors, ok := response["error"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected 'error' field in response")
+	}
+
+	errorMessage, exists := errors[field]
+	if !exists {
+		t.Fatalf("expected validation error message for field '%s'", field)
+	}
+
+	if errorMessage != expectedMessage {
+		t.Errorf("unexpected error message for field '%s': got %v, want %v", field, errorMessage, expectedMessage)
 	}
 }
 
