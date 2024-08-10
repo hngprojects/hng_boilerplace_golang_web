@@ -1,6 +1,7 @@
 package send
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/smtp"
 	"strings"
@@ -113,18 +114,70 @@ func (e *EmailRequest) sendEmailViaSMTP() error {
 	subject := e.Subject
 	recipients := e.To
 	mime := "\nMIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	body := []byte(subject + mime + e.Body)
+	body := []byte(fmt.Sprintf("From: %s\r\nTo: %s\r\n%s%s%s", sender, recipients[0], subject, mime, e.Body))
 
-	err := smtp.SendMail(
+	conn, err := tls.Dial(
+		"tcp",
 		mailConfig.Server+":"+mailConfig.Port,
-		auth,
-		sender,
-		recipients,
-		body,
-	)
+		&tls.Config{
+			InsecureSkipVerify: true,
+			ServerName:         mailConfig.Server,
+		})
 
 	if err != nil {
-		return fmt.Errorf("error connecting to SMTP server: %w", err)
+
+		return fmt.Errorf("failed to connect to the server: %v", err)
+
 	}
+
+	defer conn.Close()
+
+	client, err := smtp.NewClient(conn, mailConfig.Server)
+
+	if err != nil {
+
+		return fmt.Errorf("failed to create SMTP client: %v", err)
+
+	}
+
+	defer client.Quit()
+
+	if err = client.Auth(auth); err != nil {
+		return fmt.Errorf("failed to authenticate: %v", err)
+
+	}
+
+	if err = client.Mail(sender); err != nil {
+		return fmt.Errorf("failed to set the sender: %v", err)
+
+	}
+
+	if err = client.Rcpt(recipients[0]); err != nil {
+		return fmt.Errorf("failed to set the recipient: %v", err)
+
+	}
+
+	writer, err := client.Data()
+	if err != nil {
+
+		return fmt.Errorf("failed to write the message: %v", err)
+
+	}
+
+	_, err = writer.Write(body)
+	if err != nil {
+
+		return fmt.Errorf("failed to send the message: %v", err)
+
+	}
+
+	err = writer.Close()
+	if err != nil {
+
+		return fmt.Errorf("failed to close the writer: %v", err)
+
+	}
+
 	return nil
+
 }
