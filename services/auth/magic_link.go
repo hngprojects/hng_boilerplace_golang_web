@@ -63,7 +63,7 @@ func MagicLinkRequest(userEmail, url string, db *gorm.DB) (string, int, error) {
 		return "error", http.StatusInternalServerError, err
 	}
 
-	magic_link := fmt.Sprintf("%v/login/magic-link?token=%v", url, resetToken)
+	magic_link := fmt.Sprintf("%vauth/login/magic-link?token=%v", url, resetToken)
 
 	resetReq := models.SendMagicLink{
 		Email:     userEmail,

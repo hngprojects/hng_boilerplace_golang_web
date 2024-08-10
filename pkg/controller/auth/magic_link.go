@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,14 +31,8 @@ func (base *Controller) RequestMagicLink(c *gin.Context) {
 		return
 	}
 
-	host := c.Request.Host
-
-	scheme := "http"
-	if c.Request.TLS != nil {
-		scheme = "https"
-	}
-
-	url := scheme + "://" + host
+	url := c.Request.Header.Get("Referer")
+	fmt.Println(url, c.Request.Header)
 
 	respData, code, err := service.MagicLinkRequest(req.Email, url, base.Db.Postgresql)
 	if err != nil {
