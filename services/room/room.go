@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/hngprojects/telex_be/internal/models"
+	"github.com/hngprojects/telex_be/pkg/repository/storage/postgresql"
 	"github.com/hngprojects/telex_be/utility"
 )
 
@@ -199,7 +200,7 @@ func SearchRoomByNames(db *gorm.DB, c *gin.Context, name string) ([]models.Room,
 	var (
 		room models.Room
 	)
-	rooms, paginationResponse, err := room.SearchRoomsByName(db, c , name)
+	rooms, paginationResponse, err := room.SearchRoomsByName(db, c, name)
 
 	if err != nil {
 		return rooms, paginationResponse, err

@@ -321,16 +321,13 @@ func (base *Controller) UpdateUsername(c *gin.Context) {
 
 func (base *Controller) DeleteRoom(c *gin.Context) {
 
-
 	RoomId := c.Param("roomId")
-
 
 	if _, err := uuid.Parse(RoomId); err != nil {
 		rd := utility.BuildErrorResponse(http.StatusBadRequest, "error", "invalid room id format", errors.New("failed to parse room id"), nil)
 		c.JSON(http.StatusBadRequest, rd)
 		return
 	}
-
 
 	claims, exists := c.Get("userClaims")
 	if !exists {
@@ -357,7 +354,6 @@ func (base *Controller) DeleteRoom(c *gin.Context) {
 func (base *Controller) GetRoomByName(c *gin.Context) {
 	name := c.Params.ByName("roomName")
 
-	respData, code, err := room.GetRoomByName(base.Db.Postgresql, name)
 	respData, code, err := room.GetRoomByName(base.Db.Postgresql, name)
 	if err != nil {
 		base.Logger.Info("error getting room")
