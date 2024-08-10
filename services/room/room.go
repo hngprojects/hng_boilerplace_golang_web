@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/hngprojects/telex_be/internal/models"
+	"github.com/hngprojects/telex_be/pkg/repository/storage/postgresql"
 	"github.com/hngprojects/telex_be/utility"
 )
 
@@ -47,14 +48,14 @@ func CreateRoom(req models.CreateRoomRequest, db *gorm.DB, userId string) (model
 	return room, http.StatusOK, nil
 }
 
-func GetRoom(db *gorm.DB, roomID string) ([]models.UserRoom, int, error) {
+func GetRoom(db *gorm.DB, roomID string) (models.Room, int, error) {
 	var room models.Room
 
-	fetchedUsers, err := room.GetRoomUsersByID(db, roomID)
+	room, err := room.GetRoomByID(db, roomID)
 	if err != nil {
-		return fetchedUsers, http.StatusBadRequest, err
+		return room, http.StatusBadRequest, err
 	}
-	return fetchedUsers, http.StatusOK, nil
+	return room, http.StatusOK, nil
 }
 
 func GetRoomByName(db *gorm.DB, name string) (models.Room, int, error) {
@@ -158,7 +159,7 @@ func DeleteRoom(db *gorm.DB, roomId, userId string) (int, error) {
 	return http.StatusOK, nil
 }
 
-func CountRoomUsers(db *gorm.DB, roomId string) (int, int, error) {
+func CountRoomUsers(db *gorm.DB, roomId string) (int64, int, error) {
 	var userRoom models.UserRoom
 
 	count, err := userRoom.CountRoomUsers(db, roomId)
@@ -168,11 +169,11 @@ func CountRoomUsers(db *gorm.DB, roomId string) (int, int, error) {
 	return count, http.StatusOK, nil
 }
 
-func UpdateRoom(db *gorm.DB, req models.UpdateRoomRequest, roomId string) (models.Room, error) {
+func UpdateRoom(db *gorm.DB, req models.UpdateRoomRequest, roomId string, userId string) (models.Room, error) {
 	var (
 		room models.Room
 	)
-	updatedRoom, _, err := room.UpdateRoom(db, req, roomId)
+	updatedRoom, _, err := room.UpdateRoom(db, req, roomId, userId)
 	if err != nil {
 		return updatedRoom, err
 	}
@@ -193,5 +194,17 @@ func CheckUser(roomId, userID string, db *gorm.DB) (gin.H, int, error) {
 	}
 
 	return resp, http.StatusOK, nil
+}
 
+func SearchRoomByNames(db *gorm.DB, c *gin.Context, name string) ([]models.Room, postgresql.PaginationResponse, error) {
+	var (
+		room models.Room
+	)
+	rooms, paginationResponse, err := room.SearchRoomsByName(db, c, name)
+
+	if err != nil {
+		return rooms, paginationResponse, err
+	}
+
+	return rooms, paginationResponse, nil
 }
