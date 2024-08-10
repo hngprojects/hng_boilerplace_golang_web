@@ -120,7 +120,7 @@ func (e *EmailRequest) sendEmailViaSMTP() error {
 		"tcp",
 		mailConfig.Server+":"+mailConfig.Port,
 		&tls.Config{
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: false,
 			ServerName:         mailConfig.Server,
 		})
 
