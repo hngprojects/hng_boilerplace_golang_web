@@ -32,6 +32,8 @@ func Room(r *gin.Engine, ApiVersion string, validator *validator.Validate, db *s
 		roomUrl.GET("/name/:roomName", room.GetRoomByName)
 		roomUrl.GET("/:roomId/num-users", room.CountRoomUsers)
 		roomUrl.PATCH("/:roomId", room.UpdateRoom)
+
+		roomUrl.GET("/search/:roomName", room.SearchRoomByNames)
 	}
 	return r
 }

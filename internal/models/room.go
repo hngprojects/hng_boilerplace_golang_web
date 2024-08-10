@@ -7,6 +7,7 @@ import (
 
 	"gorm.io/gorm"
 
+	"github.com/gin-gonic/gin"
 	"github.com/hngprojects/telex_be/pkg/repository/storage/postgresql"
 )
 
@@ -16,6 +17,7 @@ type Room struct {
 	Description string    `gorm:"column:description; type:text; not null" json:"description"`
 	OwnerId     string    `gorm:"column:owner_id; type:uuid" json:"owner_id"`
 	Users       []User    `gorm:"many2many:user_rooms;" json:"users"`
+	UserCount   int64     `gorm:"-" json:"user_count"`
 	CreatedAt   time.Time `gorm:"column:created_at; not null; autoCreateTime" json:"created_at"`
 	DeletedAt   time.Time `gorm:"column: deleted_at; not null; autoDeleteTime" json:"deleted_at"`
 }
@@ -79,16 +81,6 @@ func (r *Room) GetRoomUsersByID(db *gorm.DB, roomID string) ([]UserRoom, error) 
 	return users, nil
 }
 
-func (r *Room) GetRoomByID(db *gorm.DB, roomID string) (Room, error) {
-	var room Room
-
-	err, _ := postgresql.SelectOneFromDb(db, &room, "id = ?", roomID)
-	if err != nil {
-		return room, errors.New("room not found")
-	}
-	return room, nil
-}
-
 func (r *Room) GetRoomByName(db *gorm.DB, name string) (Room, error) {
 	var room Room
 
@@ -104,14 +96,52 @@ func (r *Room) GetRoomByName(db *gorm.DB, name string) (Room, error) {
 	return room, nil
 }
 
-func (r *Room) GetRooms(db *gorm.DB) ([]Room, error) {
-	var rooms []Room
+func (r *Room) GetRoomByID(db *gorm.DB, roomID string) (Room, error) {
+	var (
+		room Room
+		ur   UserRoom
+	)
 
-	err := postgresql.SelectAllFromDb(db, "", &rooms, "")
+	err, _ := postgresql.SelectOneFromDb(db.Preload("Users"), &room, "id = ?", roomID)
+	if err != nil {
+		return room, errors.New("room not found")
+	}
+	count, err := ur.CountRoomUsers(db, roomID)
+	if err != nil {
+		return room, err
+	}
+
+	room.UserCount = count
+
+	return room, nil
+}
+
+func (r *Room) GetRooms(db *gorm.DB) ([]Room, error) {
+	var (
+		rooms []Room
+		ur    UserRoom
+	)
+
+	err := postgresql.SelectAllFromDb(db.Preload("Users"), "", &rooms, "")
 	if err != nil {
 		return rooms, err
 	}
+
+	for i, room := range rooms {
+		count, _ := ur.CountRoomUsers(db, room.ID)
+
+		rooms[i].UserCount = count
+	}
 	return rooms, nil
+}
+
+func (u *UserRoom) CountRoomUsers(db *gorm.DB, roomID string) (int64, error) {
+	var count int64
+	err := db.Model(&UserRoom{}).Where("room_id = ?", roomID).Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func (r *Room) GetRoomMessages(db *gorm.DB, userID, roomID string) ([]Message, error) {
@@ -244,29 +274,17 @@ func (c *UserRoom) UserInRoom(db *gorm.DB, roomID, userID string) error {
 	return nil
 }
 
-func (u *UserRoom) CountRoomUsers(db *gorm.DB, roomID string) (int, error) {
-	var users []UserRoom
-
-	exists := postgresql.CheckExists(db, &u, "room_id = ?", roomID)
-	if !exists {
-		return 0, errors.New("room does not exist")
-	}
-
-	err := postgresql.SelectAllFromDb(db, "", &users, "room_id = ?", roomID)
-	if err != nil {
-		return 0, err
-	}
-
-	return len(users), nil
-}
-
-func (r *Room) UpdateRoom(db *gorm.DB, req UpdateRoomRequest, roomID string) (Room, int, error) {
+func (r *Room) UpdateRoom(db *gorm.DB, req UpdateRoomRequest, roomID string, userId string) (Room, int, error) {
 	var room Room
 	room.ID = roomID
 
 	exists := postgresql.CheckExists(db, &room, "id = ?", roomID)
 	if !exists {
 		return room, http.StatusNotFound, errors.New("room does not exist")
+	}
+
+	if room.OwnerId != userId {
+		return room, http.StatusUnauthorized, errors.New("user not authorized")
 	}
 
 	room.Name = req.Name
@@ -297,4 +315,32 @@ func (r *UserRoom) CheckUser(db *gorm.DB, userID, roomID string) (bool, string) 
 	}
 
 	return true, "user in room"
+}
+
+func (r *Room) SearchRoomsByName(db *gorm.DB, c *gin.Context, name string) ([]Room, postgresql.PaginationResponse, error) {
+	var rooms []Room
+
+	pagination := postgresql.GetPagination(c)
+
+	paginationResponse, err := postgresql.SelectAllFromDbOrderByPaginated(
+		db.Preload("Users"),
+		"created_at",
+		"desc",
+		pagination,
+		&rooms,
+		"name LIKE ?",
+		"%"+name+"%",
+	)
+
+	if err != nil {
+		return nil, paginationResponse, err
+	}
+
+	for i, room := range rooms {
+		var userRoom UserRoom
+		count, _ := userRoom.CountRoomUsers(db, room.ID)
+		rooms[i].UserCount = count
+	}
+
+	return rooms, paginationResponse, nil
 }
