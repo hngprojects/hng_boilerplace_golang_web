@@ -44,10 +44,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Create app.env file
-        uses: vicradon/create-env-action@v1.0.0
+        uses: vicradon/create-env-action@v1.0.1
         with:
           action_input_file: "app-sample.env"
           action_output_file: "app.env"
+          action_true_string_variables: |
+            MAIL_PASSWORD
           APP_NAME: "staging"
           APP_URL: "https://staging.api-golang.boilerplate.hng.tech"
           SERVER_PORT: ${{ secrets.SERVER_PORT }}
