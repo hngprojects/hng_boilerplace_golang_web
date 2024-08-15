@@ -6,5 +6,9 @@
     "@playwright/test": "^1.46.0",
     "@types/node": "^22.2.0"
   },
-  "scripts": {}
+  "scripts": {
+    "playwright install": "npm init playwright@latest",
+    "playwright run": "npx playwright test",
+    "playwright report": "npx playwright show-report"
+  }
 }
