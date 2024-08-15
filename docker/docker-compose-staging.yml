@@ -1,4 +1,4 @@
-name: golang_prod
+name: golang_staging
 
 services:
   db:
@@ -6,18 +6,20 @@ services:
     env_file:
       - app.env
     volumes:
-      - ../pgsql_volumes/golang_prod/:/var/lib/postgresql/data
+      - ../golang_volumes/pgsql_volumes/golang_staging/:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U production_user"]
+      test: ["CMD-SHELL", "pg_isready -U staging_user"]
       interval: 10s
       timeout: 5s
       retries: 2
 
   redis:
     image: redis:latest
+    volumes:
+      - ../golang_volumes/redis_volumes/golang_staging/:/data
 
   backend:
-    image: golang_prod
+    image: golang_staging:latest
     build:
       context: .
     depends_on:
@@ -33,6 +35,6 @@ services:
     depends_on:
       - backend
     ports:
-      - "7002:80"
+      - "7001:80"
     volumes:
-      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf
+      - ./nginx/nginx.staging.conf:/etc/nginx/nginx.conf

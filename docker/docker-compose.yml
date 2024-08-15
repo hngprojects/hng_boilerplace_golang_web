@@ -23,7 +23,7 @@ services:
       - ../golang_volumes/redis_volumes/golang_dev/:/data
 
   backend:
-    image: golang_dev
+    image: golang_dev:latest
     build:
       context: .
     depends_on:

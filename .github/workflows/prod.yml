@@ -1,0 +1,83 @@
+name: Build, Test, and Deploy for Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_upload_artifact:
+    runs-on: ubuntu-latest
+    if: github.event.repository.fork == false
+    environment: production
+    env:
+      SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Set Golang
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.22.1"
+      - name: Create app config file
+        run: cp app-sample.env app.env
+      - name: Build the application
+        run: go build -o production_app
+    
+      - name: Create app.env file
+        uses: vicradon/create-env-action@v1.0.1
+        with:
+          action_input_file: "app-sample.env"
+          action_output_file: "app.env"
+          action_true_string_variables: |
+            MAIL_PASSWORD
+          SERVER_PORT: ${{ secrets.SERVER_PORT }} 
+          DB_NAME: ${{ secrets.DB_NAME }}
+          USERNAME: ${{ secrets.USERNAME }} 
+          APP_NAME: "production"
+          APP_URL: ${{ vars.URL}}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }} 
+          MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_PORT: ${{ secrets.MAIL_PORT }}
+          MIGRATE: "true"
+
+      - name: Copy artifacts to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USERNAME }}
+          password: ${{ env.SSH_PASSWORD }}
+          port: ${{ env.SSH_PORT }}
+          source: "app.env,production_app"
+          target: ~/deployments/production
+
+  restart_app:
+    runs-on: ubuntu-latest
+    needs: build_and_upload_artifact
+    environment: production
+    env:
+      SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+
+    steps:
+      - name: SSH into server and deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USERNAME }}
+          password: ${{ env.SSH_PASSWORD }}
+          port: ${{ env.SSH_PORT }}
+          script: |
+            mkdir -p ~/deployments/production
+            cd ~/deployments/production
+            git reset --hard
+            git pull origin main
+            pm2 restart production_app
