@@ -28,6 +28,7 @@ _ignore/
 app.env
 tmp/
 .idea/
+./test/node_modules
 
 dump.rdb
 app.env 
