@@ -24,8 +24,7 @@ jobs:
       - name: Run Newman tests
         id: newman
         run: |
-          newman run status/postman/telex_postmancollection_v1.json --reporters cli,json --reporter-json-export report.json
-
+          newman run status/postman/KimikoGolangSwagger.postman_collection.json --reporters cli,json --reporter-json-export report.json
       - name: Upload Newman Report to API
         run: |
           curl -X POST ${{ vars.API_URL }}/api/v1/api-status \
