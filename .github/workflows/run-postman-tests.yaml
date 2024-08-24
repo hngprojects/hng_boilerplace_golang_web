@@ -1,0 +1,32 @@
+name: Run Postman Tests Every 15 Minutes
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/15 * * * *' # Every 15 minutes
+
+jobs:
+  run-postman-tests:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Run Newman tests
+        id: newman
+        run: |
+          newman run status/postman/KimikoGolangSwagger.postman_collection.json --reporters cli,json --reporter-json-export report.json
+      - name: Upload Newman Report to API
+        run: |
+          curl -X POST ${{ vars.API_URL }}/api/v1/api-status \
+          -H "Content-Type: multipart/form-data" \
+          -F "result_file=@report.json"
