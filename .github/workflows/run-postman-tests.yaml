@@ -25,6 +25,8 @@ jobs:
         id: newman
         run: |
           newman run status/postman/KimikoGolangSwagger.postman_collection.json --reporters cli,json --reporter-json-export report.json
+        continue-on-error: true
+        
       - name: Upload Newman Report to API
         run: |
           curl -X POST ${{ vars.API_URL }}/api/v1/api-status \
