@@ -2,8 +2,8 @@ name: Run Postman Tests Every 15 Minutes
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '*/15 * * * *' # Every 15 minutes
+  # schedule:
+  #   - cron: '*/15 * * * *' # Every 15 minutes
 
 jobs:
   run-postman-tests:
